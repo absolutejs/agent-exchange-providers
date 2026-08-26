@@ -47,6 +47,7 @@ const assertRpId = (origin: URL, rpId: string): void => {
   const normalized = rpId.toLowerCase();
   if (
     normalized === "" ||
+    !normalized.includes(".") ||
     normalized.includes(":") ||
     (origin.hostname !== normalized &&
       !origin.hostname.endsWith(`.${normalized}`))
@@ -93,7 +94,12 @@ export const createWebAuthnAgentExchangeApprovalProvider = (
 
   return {
     begin: async ({ challenge, request, subject, verifierOrigin }) => {
-      if (verifierOrigin !== expectedOrigin) return fail();
+      if (
+        verifierOrigin !== expectedOrigin ||
+        request.requester.authority !== expectedOrigin ||
+        subject !== request.requester.subject
+      )
+        return fail();
       const { credentials } = await resolveOwnedCredentials(request, subject);
       const generated = await options.adapter.createAuthenticationOptions({
         allowCredentials: credentials.map(({ credentialId, transports }) => ({
@@ -115,7 +121,12 @@ export const createWebAuthnAgentExchangeApprovalProvider = (
       subject,
       verifierOrigin,
     }) => {
-      if (verifierOrigin !== expectedOrigin) return fail();
+      if (
+        verifierOrigin !== expectedOrigin ||
+        request.requester.authority !== expectedOrigin ||
+        subject !== request.requester.subject
+      )
+        return fail();
       const { credentials, userId } = await resolveOwnedCredentials(
         request,
         subject,

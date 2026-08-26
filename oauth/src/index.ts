@@ -94,7 +94,11 @@ const validateProfile = (profile: HardenedOAuthProfile): void => {
   const details = profile.authorizationDetails;
   if (
     details.type === "" ||
+    details.type.length > 256 ||
     details.actions.length === 0 ||
+    details.actions.some(
+      (action) => action.length === 0 || action.length > 256,
+    ) ||
     details.locations.length === 0 ||
     details.locations.some(
       (location) =>
@@ -337,7 +341,8 @@ export const redeemOAuthGrant = async <Result>(options: {
   if (!response.ok) fail("token redemption failed");
   const parsed = await readJson(response);
   if (
-    parsed.token_type !== "DPoP" ||
+    typeof parsed.token_type !== "string" ||
+    parsed.token_type.toLowerCase() !== "dpop" ||
     typeof parsed.access_token !== "string" ||
     parsed.access_token.length === 0 ||
     parsed.access_token.length > 16 * 1024 ||

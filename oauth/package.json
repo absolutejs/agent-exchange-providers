@@ -10,6 +10,10 @@
     "url": "git+https://github.com/absolutejs/agent-exchange-providers.git",
     "directory": "oauth"
   },
+  "homepage": "https://github.com/absolutejs/agent-exchange-providers/tree/main/oauth",
+  "bugs": {
+    "url": "https://github.com/absolutejs/agent-exchange-providers/issues"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
