@@ -30,9 +30,9 @@
     },
     "destinations": {
       "name": "@absolutejs/agent-exchange-destinations",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
-        "@absolutejs/agent-exchange": "0.3.0",
+        "@absolutejs/agent-exchange": "0.4.3",
       },
       "devDependencies": {
         "@types/bun": "^1.3.14",
@@ -52,12 +52,12 @@
     },
     "http-destination": {
       "name": "@absolutejs/agent-exchange-http-destination",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
-        "@absolutejs/agent-exchange-destinations": "0.1.0",
+        "@absolutejs/agent-exchange-destinations": "0.2.0",
       },
       "devDependencies": {
-        "@absolutejs/agent-exchange": "0.3.0",
+        "@absolutejs/agent-exchange": "0.4.3",
         "@types/bun": "^1.3.14",
         "typescript": "^5.9.0",
       },
@@ -245,10 +245,6 @@
     "@absolutejs/a2a/@absolutejs/manifest": ["@absolutejs/manifest@0.7.3", "", { "peerDependencies": { "@sinclair/typebox": ">=0.34.0 <0.35.0" }, "bin": { "absolute-manifest": "dist/cli.js" } }, "sha512-P0Tx5L+o4ZBBvmOz86JdjNYC1nUaCRgSlX8OgXzmGK0iSPL3gxdUUUyPKNUzjdQicu0Waj0MZHz1XIEBLtjTlw=="],
 
     "@absolutejs/agency/@absolutejs/manifest": ["@absolutejs/manifest@0.7.3", "", { "peerDependencies": { "@sinclair/typebox": ">=0.34.0 <0.35.0" }, "bin": { "absolute-manifest": "dist/cli.js" } }, "sha512-P0Tx5L+o4ZBBvmOz86JdjNYC1nUaCRgSlX8OgXzmGK0iSPL3gxdUUUyPKNUzjdQicu0Waj0MZHz1XIEBLtjTlw=="],
-
-    "@absolutejs/agent-exchange-destinations/@absolutejs/agent-exchange": ["@absolutejs/agent-exchange@0.3.0", "", { "dependencies": { "@absolutejs/a2a": "^0.3.6", "@absolutejs/agency": "^0.7.4", "@absolutejs/e2ee": "0.1.0", "@absolutejs/manifest": "^0.9.0", "@sinclair/typebox": "^0.34.0" } }, "sha512-t2sQZKjY/YF9YGfddJik6XVAodLLgUMI4QrlHzfeLRHOMZet2iuo/mggFOiqENxFG+/bVxEq3Kqsc46GpPTCgA=="],
-
-    "@absolutejs/agent-exchange-http-destination/@absolutejs/agent-exchange": ["@absolutejs/agent-exchange@0.3.0", "", { "dependencies": { "@absolutejs/a2a": "^0.3.6", "@absolutejs/agency": "^0.7.4", "@absolutejs/e2ee": "0.1.0", "@absolutejs/manifest": "^0.9.0", "@sinclair/typebox": "^0.34.0" } }, "sha512-t2sQZKjY/YF9YGfddJik6XVAodLLgUMI4QrlHzfeLRHOMZet2iuo/mggFOiqENxFG+/bVxEq3Kqsc46GpPTCgA=="],
 
     "@absolutejs/agent-exchange-mandate-stores/@absolutejs/agent-exchange": ["@absolutejs/agent-exchange@0.4.0", "", { "dependencies": { "@absolutejs/a2a": "^0.3.6", "@absolutejs/agency": "^0.7.4", "@absolutejs/e2ee": "0.1.0", "@absolutejs/manifest": "^0.9.0", "@sinclair/typebox": "^0.34.0" } }, "sha512-sxHVO9OmhyTSWaZkzMoahckLBKXen2nySGBDEbqjbZmYc2Rdo4bQz10YBvdhxU1AxY/YrHOArPyOdykJguLw9w=="],
 
