@@ -49,7 +49,7 @@ export type OAuthGrant = {
 export type DpopProofSigner = {
   readonly createProof: (input: {
     readonly accessToken?: string;
-    readonly htm: "POST";
+    readonly htm: string;
     readonly htu: string;
     readonly nonce?: string;
   }) => Promise<string> | string;

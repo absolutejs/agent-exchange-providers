@@ -29,3 +29,16 @@ declared resource and operation.
 
 Security is the minimum of these three dimensions. No adapter may upgrade a weak
 dimension merely because another dimension is strong.
+
+## Provider reality
+
+Google documents S256 PKCE, RFC 9207 issuer responses, and DPoP protection for
+refresh tokens used by confidential BFF clients. Its documented access token is
+still `Bearer`, and its flow does not expose every PAR/RAR/resource-indicator
+feature required by this repository's strict profile.
+
+Microsoft Graph documents authorization code + S256 PKCE. Its generally
+available documentation does not establish every strict-profile capability;
+proof-of-possession token binding is currently documented with important
+availability limitations. The adapter therefore reports unknown or unsupported
+features instead of inferring them.

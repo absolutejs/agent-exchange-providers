@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "noEmit": false,
+    "outDir": "dist",
+    "rootDir": "src",
+    "paths": {
+      "@absolutejs/agent-exchange-oauth": ["../oauth/dist/index.d.ts"],
+      "@absolutejs/agent-exchange-provider-conformance": [
+        "../conformance/dist/index.d.ts"
+      ]
+    }
+  },
+  "exclude": ["tests"],
+  "include": ["src/**/*.ts"]
+}

@@ -3,11 +3,16 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "webauthn",
-    "oauth"
+    "conformance",
+    "google",
+    "microsoft",
+    "oauth",
+    "oauth-stores",
+    "oauth-webcrypto",
+    "webauthn"
   ],
   "scripts": {
-    "build": "bun run --filter './*' build",
+    "build": "bun run --cwd conformance build && bun run --cwd oauth build && bun run --cwd webauthn build && bun run --cwd oauth-webcrypto build && bun run --cwd oauth-stores build && bun run --cwd google build && bun run --cwd microsoft build",
     "check:package": "bun run format:check && bun run typecheck && bun run test && bun run build",
     "format": "prettier --write \"./**/*.{ts,json,md}\"",
     "format:check": "prettier --check \"./**/*.{ts,json,md}\"",

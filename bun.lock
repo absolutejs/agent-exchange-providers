@@ -10,9 +10,39 @@
         "typescript": "^5.9.0",
       },
     },
+    "conformance": {
+      "name": "@absolutejs/agent-exchange-provider-conformance",
+      "version": "0.1.0",
+      "devDependencies": {
+        "@types/bun": "^1.3.14",
+        "typescript": "^5.9.0",
+      },
+    },
+    "google": {
+      "name": "@absolutejs/agent-exchange-google",
+      "version": "0.1.0",
+      "dependencies": {
+        "@absolutejs/agent-exchange-provider-conformance": "0.1.0",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.3.14",
+        "typescript": "^5.9.0",
+      },
+    },
+    "microsoft": {
+      "name": "@absolutejs/agent-exchange-microsoft",
+      "version": "0.1.0",
+      "dependencies": {
+        "@absolutejs/agent-exchange-provider-conformance": "0.1.0",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.3.14",
+        "typescript": "^5.9.0",
+      },
+    },
     "oauth": {
       "name": "@absolutejs/agent-exchange-oauth",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "devDependencies": {
         "@absolutejs/agent-exchange": "0.2.0",
         "@types/bun": "^1.3.14",
@@ -20,6 +50,33 @@
       },
       "peerDependencies": {
         "@absolutejs/agent-exchange": ">=0.2.0 <0.3",
+      },
+    },
+    "oauth-stores": {
+      "name": "@absolutejs/agent-exchange-oauth-stores",
+      "version": "0.1.0",
+      "devDependencies": {
+        "@absolutejs/agent-exchange-oauth": "0.2.0",
+        "@types/bun": "^1.3.14",
+        "typescript": "^5.9.0",
+      },
+      "peerDependencies": {
+        "@absolutejs/agent-exchange-oauth": ">=0.2.0 <0.3",
+      },
+    },
+    "oauth-webcrypto": {
+      "name": "@absolutejs/agent-exchange-oauth-webcrypto",
+      "version": "0.1.0",
+      "dependencies": {
+        "@absolutejs/agent-exchange-provider-conformance": "0.1.0",
+      },
+      "devDependencies": {
+        "@absolutejs/agent-exchange-oauth": "0.2.0",
+        "@types/bun": "^1.3.14",
+        "typescript": "^5.9.0",
+      },
+      "peerDependencies": {
+        "@absolutejs/agent-exchange-oauth": ">=0.2.0 <0.3",
       },
     },
     "webauthn": {
@@ -44,7 +101,17 @@
 
     "@absolutejs/agent-exchange": ["@absolutejs/agent-exchange@0.2.0", "", { "dependencies": { "@absolutejs/a2a": "^0.3.6", "@absolutejs/agency": "^0.7.4", "@absolutejs/e2ee": "0.1.0", "@absolutejs/manifest": "^0.9.0", "@sinclair/typebox": "^0.34.0" } }, "sha512-VxZzcK+q+dTAJT1CmqzKUa2ddjZLM7apa8iy6XyfQ6Gx94LzxnGdWpmbNnCO5g/vg65Vk2VcW2yGctszjC7BmA=="],
 
+    "@absolutejs/agent-exchange-google": ["@absolutejs/agent-exchange-google@workspace:google"],
+
+    "@absolutejs/agent-exchange-microsoft": ["@absolutejs/agent-exchange-microsoft@workspace:microsoft"],
+
     "@absolutejs/agent-exchange-oauth": ["@absolutejs/agent-exchange-oauth@workspace:oauth"],
+
+    "@absolutejs/agent-exchange-oauth-stores": ["@absolutejs/agent-exchange-oauth-stores@workspace:oauth-stores"],
+
+    "@absolutejs/agent-exchange-oauth-webcrypto": ["@absolutejs/agent-exchange-oauth-webcrypto@workspace:oauth-webcrypto"],
+
+    "@absolutejs/agent-exchange-provider-conformance": ["@absolutejs/agent-exchange-provider-conformance@workspace:conformance"],
 
     "@absolutejs/agent-exchange-webauthn": ["@absolutejs/agent-exchange-webauthn@workspace:webauthn"],
 

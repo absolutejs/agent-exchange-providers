@@ -1,16 +1,16 @@
 {
-  "name": "@absolutejs/agent-exchange-oauth",
-  "version": "0.2.0",
-  "description": "Hardened OAuth grant exchange using PAR, PKCE, RAR, resource indicators, issuer validation, and DPoP.",
+  "name": "@absolutejs/agent-exchange-provider-conformance",
+  "version": "0.1.0",
+  "description": "Security capability and DPoP conformance checks for Agent Exchange providers.",
   "type": "module",
   "license": "Apache-2.0",
   "author": "Alex Kahn",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/absolutejs/agent-exchange-providers.git",
-    "directory": "oauth"
+    "directory": "conformance"
   },
-  "homepage": "https://github.com/absolutejs/agent-exchange-providers/tree/main/oauth",
+  "homepage": "https://github.com/absolutejs/agent-exchange-providers/tree/main/conformance",
   "bugs": {
     "url": "https://github.com/absolutejs/agent-exchange-providers/issues"
   },
@@ -26,27 +26,20 @@
   "files": [
     "dist",
     "LICENSE",
-    "README.md",
-    "SECURITY.md"
+    "README.md"
   ],
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "rm -rf dist && bun build src/index.ts --outdir dist --root src --sourcemap --target=browser --external @absolutejs/agent-exchange && tsc --project tsconfig.build.json",
-    "check:package": "bun run format:check && bun run typecheck && bun run test && bun run build",
+    "build": "rm -rf dist && bun build src/index.ts --outdir dist --root src --sourcemap --target=browser && tsc --project tsconfig.build.json",
     "format": "prettier --write \"./**/*.{ts,json,md}\"",
     "format:check": "prettier --check \"./**/*.{ts,json,md}\"",
-    "release": "bun run check:package && npm publish --access public",
     "test": "bun test tests/",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@absolutejs/agent-exchange": "0.2.0",
     "@types/bun": "^1.3.14",
     "typescript": "^5.9.0"
-  },
-  "peerDependencies": {
-    "@absolutejs/agent-exchange": ">=0.2.0 <0.3"
   }
 }
