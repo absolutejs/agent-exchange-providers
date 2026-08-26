@@ -12,7 +12,7 @@
     },
     "broker": {
       "name": "@absolutejs/agent-exchange-broker",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "@absolutejs/agent-exchange": "0.3.0",
       },
@@ -28,6 +28,17 @@
         "typescript": "^5.9.0",
       },
     },
+    "destinations": {
+      "name": "@absolutejs/agent-exchange-destinations",
+      "version": "0.1.0",
+      "dependencies": {
+        "@absolutejs/agent-exchange": "0.3.0",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.3.14",
+        "typescript": "^5.9.0",
+      },
+    },
     "google": {
       "name": "@absolutejs/agent-exchange-google",
       "version": "0.1.0",
@@ -35,6 +46,18 @@
         "@absolutejs/agent-exchange-provider-conformance": "0.1.0",
       },
       "devDependencies": {
+        "@types/bun": "^1.3.14",
+        "typescript": "^5.9.0",
+      },
+    },
+    "http-destination": {
+      "name": "@absolutejs/agent-exchange-http-destination",
+      "version": "0.1.0",
+      "dependencies": {
+        "@absolutejs/agent-exchange-destinations": "0.1.0",
+      },
+      "devDependencies": {
+        "@absolutejs/agent-exchange": "0.3.0",
         "@types/bun": "^1.3.14",
         "typescript": "^5.9.0",
       },
@@ -113,7 +136,11 @@
 
     "@absolutejs/agent-exchange-broker": ["@absolutejs/agent-exchange-broker@workspace:broker"],
 
+    "@absolutejs/agent-exchange-destinations": ["@absolutejs/agent-exchange-destinations@workspace:destinations"],
+
     "@absolutejs/agent-exchange-google": ["@absolutejs/agent-exchange-google@workspace:google"],
+
+    "@absolutejs/agent-exchange-http-destination": ["@absolutejs/agent-exchange-http-destination@workspace:http-destination"],
 
     "@absolutejs/agent-exchange-microsoft": ["@absolutejs/agent-exchange-microsoft@workspace:microsoft"],
 

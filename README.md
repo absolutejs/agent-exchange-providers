@@ -16,6 +16,12 @@ Interchangeable, security-profiled providers for
   provider security capabilities and verifies DPoP proofs.
 - [`@absolutejs/agent-exchange-broker`](./broker) confines an upstream bearer
   token to one tenant, exchange, provider, purpose, and deterministic operation.
+- [`@absolutejs/agent-exchange-destinations`](./destinations) selects one
+  destination by exact origin, operation, and secret kind and rejects ambiguous
+  or secret-reflecting adapters.
+- [`@absolutejs/agent-exchange-http-destination`](./http-destination) submits a
+  six-digit code to one deployment-configured HTTPS endpoint without following
+  redirects or returning the destination response to an agent.
 - [`@absolutejs/agent-exchange-google`](./google) and
   [`@absolutejs/agent-exchange-microsoft`](./microsoft) describe real BYO mailbox
   provider capabilities without upgrading their bearer-token boundaries.
