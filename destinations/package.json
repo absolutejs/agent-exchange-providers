@@ -1,6 +1,6 @@
 {
   "name": "@absolutejs/agent-exchange-destinations",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Interchangeable, deterministic destination adapter contract for Agent Exchange.",
   "type": "module",
   "license": "Apache-2.0",
@@ -40,9 +40,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@absolutejs/agent-exchange": "0.4.3"
+    "@absolutejs/agent-exchange": ">=0.4.3 <0.5"
   },
   "devDependencies": {
+    "@absolutejs/agent-exchange": "0.4.4",
     "@types/bun": "^1.3.14",
     "typescript": "^5.9.0"
   }
