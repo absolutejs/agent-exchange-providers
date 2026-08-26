@@ -43,6 +43,7 @@ export type TokenConfinedCredential = {
 export type TokenConfinedCredentialResolver = {
   readonly resolve: (input: {
     readonly accountRef: string;
+    readonly exchangeId: string;
     readonly provider: string;
     readonly subject: string;
     readonly tenantId: string;
@@ -128,6 +129,7 @@ export const createTokenConfinedBroker = (options: {
       try {
         const credential = await options.credentials.resolve({
           accountRef: input.request.resource.accountRef,
+          exchangeId: input.request.exchangeId,
           provider: input.request.resource.provider,
           subject: input.request.requester.subject,
           tenantId: input.tenantId,
