@@ -1,0 +1,51 @@
+{
+  "name": "@absolutejs/agent-exchange-a2a",
+  "version": "0.1.0",
+  "description": "Negotiated, authenticated A2A client and server adapters for model-blind AbsoluteJS Agent Exchange.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "author": "Alex Kahn",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/absolutejs/agent-exchange-providers.git",
+    "directory": "a2a"
+  },
+  "homepage": "https://github.com/absolutejs/agent-exchange-providers/tree/main/a2a",
+  "bugs": {
+    "url": "https://github.com/absolutejs/agent-exchange-providers/issues"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "SECURITY.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "rm -rf dist && bun build src/index.ts --outdir dist --target=node --external @absolutejs/a2a --external @absolutejs/agent-exchange && tsc --project tsconfig.build.json",
+    "check:package": "bun run format:check && bun run typecheck && bun run test && bun run build",
+    "format:check": "prettier --check \"./**/*.{ts,json,md}\"",
+    "release": "bun run check:package && npm publish --access public",
+    "test": "bun test tests/",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@absolutejs/a2a": ">=0.3.6 <0.4",
+    "@absolutejs/agent-exchange": ">=0.4.4 <0.5"
+  },
+  "devDependencies": {
+    "@absolutejs/a2a": "0.3.6",
+    "@absolutejs/agent-exchange": "0.4.4"
+  }
+}
