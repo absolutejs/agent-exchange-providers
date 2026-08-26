@@ -70,7 +70,7 @@ describe("hardened OAuth Agent Exchange", () => {
         return Response.json(
           {
             expires_in: 90,
-            request_uri: "urn:ietf:params:oauth:request_uri:abc",
+            request_uri: "https://issuer.example/request/abc",
           },
           { status: 201 },
         );
@@ -91,7 +91,7 @@ describe("hardened OAuth Agent Exchange", () => {
     });
     const begun = await client.begin(request);
     expect(begun.url).toContain(
-      "request_uri=urn%3Aietf%3Aparams%3Aoauth%3Arequest_uri%3Aabc",
+      "request_uri=https%3A%2F%2Fissuer.example%2Frequest%2Fabc",
     );
     expect(begun.url).not.toContain("code_challenge");
     const params = new URLSearchParams(parBody);

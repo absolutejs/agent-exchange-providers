@@ -163,6 +163,22 @@ const readJson = async (
   }
 };
 
+const validRequestUri = (value: unknown): value is string => {
+  if (
+    typeof value !== "string" ||
+    value.length === 0 ||
+    value.length > 2048 ||
+    /[\u0000-\u0020\u007f]/u.test(value)
+  )
+    return false;
+  try {
+    const uri = new URL(value);
+    return uri.protocol !== "" && uri.hash === "";
+  } catch {
+    return false;
+  }
+};
+
 export const createHardenedOAuthAuthorizationClient = (options: {
   readonly fetch?: OAuthFetch;
   readonly now?: () => number;
@@ -203,9 +219,7 @@ export const createHardenedOAuthAuthorizationClient = (options: {
       if (response.status !== 201) fail("PAR was not accepted");
       const parsed = await readJson(response);
       if (
-        typeof parsed.request_uri !== "string" ||
-        !parsed.request_uri.startsWith("urn:") ||
-        parsed.request_uri.length > 2048 ||
+        !validRequestUri(parsed.request_uri) ||
         typeof parsed.expires_in !== "number" ||
         !Number.isSafeInteger(parsed.expires_in) ||
         parsed.expires_in < 1 ||
