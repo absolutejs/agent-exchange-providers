@@ -1,6 +1,6 @@
 {
   "name": "@absolutejs/agent-exchange-a2a",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Negotiated, authenticated A2A client and server adapters for model-blind AbsoluteJS Agent Exchange.",
   "type": "module",
   "license": "Apache-2.0",

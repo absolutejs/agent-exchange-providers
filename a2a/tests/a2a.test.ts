@@ -150,7 +150,7 @@ describe("Agent Exchange A2A adapter", () => {
 
   test("requires both advertised and request-activated extension support", async () => {
     expect(() => createAgentExchangeA2aClient({ agentCard: card() })).toThrow(
-      "does not require",
+      "does not advertise",
     );
 
     const { localFetch } = harness();

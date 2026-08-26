@@ -132,9 +132,47 @@ const assertCard = (card: A2aAgentCard): A2aAgentCard => {
   const extension = card.capabilities.extensions?.find(
     (candidate) => candidate.uri === ABSOLUTE_AGENT_EXCHANGE_EXTENSION,
   );
-  if (extension?.required !== true)
-    throw new Error("Agent does not require the Agent Exchange A2A extension");
+  if (extension === undefined)
+    throw new Error(
+      "Agent does not advertise the Agent Exchange A2A extension",
+    );
   return card;
+};
+
+export const toAgentExchangeA2aTask = (input: {
+  readonly message: Parameters<typeof parseA2aAgentExchangeReference>[0];
+  readonly receipt: AgentExchangeA2aReceipt;
+  readonly reference: A2aAgentExchangeReference;
+}): A2aTask => {
+  const receipt = parseReceipt(input.receipt);
+  if (
+    receipt.exchangeId !== input.reference.exchangeId ||
+    receipt.mandateId !== input.reference.mandateId
+  )
+    throw new Error("Agent Exchange A2A execution was rejected");
+  return {
+    artifacts: [
+      {
+        artifactId: `receipt_${input.reference.exchangeId}`,
+        name: "Redacted Agent Exchange receipt",
+        parts: [
+          { data: receipt, mediaType: AGENT_EXCHANGE_RECEIPT_MEDIA_TYPE },
+        ],
+      },
+    ],
+    contextId: input.reference.exchangeId,
+    history: [input.message],
+    id: input.reference.exchangeId,
+    metadata: {
+      [ABSOLUTE_AGENT_EXCHANGE_EXTENSION]: {
+        exchangeId: input.reference.exchangeId,
+      },
+    },
+    status: {
+      state: "TASK_STATE_COMPLETED",
+      timestamp: new Date(receipt.completedAt).toISOString(),
+    },
+  };
 };
 
 export const withAgentExchangeA2aProfile = (
@@ -193,35 +231,7 @@ export const createAgentExchangeA2aHandler = <Caller>(
           request: context.request,
         }),
       );
-      if (
-        receipt.exchangeId !== reference.exchangeId ||
-        receipt.mandateId !== reference.mandateId
-      )
-        throw new Error("Agent Exchange A2A execution was rejected");
-      const task: A2aTask = {
-        artifacts: [
-          {
-            artifactId: `receipt_${reference.exchangeId}`,
-            name: "Redacted Agent Exchange receipt",
-            parts: [
-              { data: receipt, mediaType: AGENT_EXCHANGE_RECEIPT_MEDIA_TYPE },
-            ],
-          },
-        ],
-        contextId: reference.exchangeId,
-        history: [message],
-        id: reference.exchangeId,
-        metadata: {
-          [ABSOLUTE_AGENT_EXCHANGE_EXTENSION]: {
-            exchangeId: reference.exchangeId,
-          },
-        },
-        status: {
-          state: "TASK_STATE_COMPLETED",
-          timestamp: new Date(receipt.completedAt).toISOString(),
-        },
-      };
-      return { task };
+      return { task: toAgentExchangeA2aTask({ message, receipt, reference }) };
     },
     taskStore: options.taskStore,
   });
