@@ -1,6 +1,6 @@
 {
   "name": "@absolutejs/agent-exchange-a2a",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Negotiated, authenticated A2A client and server adapters for model-blind AbsoluteJS Agent Exchange.",
   "type": "module",
   "license": "Apache-2.0",
@@ -42,10 +42,10 @@
   },
   "peerDependencies": {
     "@absolutejs/a2a": ">=0.3.6 <0.4",
-    "@absolutejs/agent-exchange": ">=0.4.4 <0.5"
+    "@absolutejs/agent-exchange": ">=0.5.0 <0.6"
   },
   "devDependencies": {
     "@absolutejs/a2a": "0.3.6",
-    "@absolutejs/agent-exchange": "0.4.4"
+    "@absolutejs/agent-exchange": "0.5.0"
   }
 }
