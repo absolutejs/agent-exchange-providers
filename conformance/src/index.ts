@@ -219,3 +219,5 @@ export const verifyDpopProof = async (input: {
   if (!verified) throw new Error("invalid DPoP signature");
   return Object.freeze({ ...jwk });
 };
+
+export * from "./a2a";

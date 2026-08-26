@@ -13,7 +13,9 @@ Interchangeable, security-profiled providers for
 - [`@absolutejs/agent-exchange-oauth-stores`](./oauth-stores) supplies one-time
   memory, Redis, and PostgreSQL authorization-session stores.
 - [`@absolutejs/agent-exchange-provider-conformance`](./conformance) evaluates
-  provider security capabilities and verifies DPoP proofs.
+  provider security capabilities, verifies DPoP proofs, and actively tests A2A
+  sandboxes for negotiation, preparation, credential separation, replay safety,
+  and task/receipt redaction.
 - [`@absolutejs/agent-exchange-broker`](./broker) confines an upstream bearer
   token to one tenant, exchange, provider, purpose, and deterministic operation.
 - [`@absolutejs/agent-exchange-mandate-webcrypto`](./mandate-webcrypto) signs and
