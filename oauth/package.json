@@ -1,6 +1,6 @@
 {
   "name": "@absolutejs/agent-exchange-oauth",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Hardened OAuth grant exchange using PAR, PKCE, RAR, resource indicators, issuer validation, and DPoP.",
   "type": "module",
   "license": "Apache-2.0",
@@ -47,6 +47,6 @@
     "typescript": "^5.9.0"
   },
   "peerDependencies": {
-    "@absolutejs/agent-exchange": ">=0.2.0 <0.3"
+    "@absolutejs/agent-exchange": ">=0.2.0 <0.4"
   }
 }

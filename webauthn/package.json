@@ -1,6 +1,6 @@
 {
   "name": "@absolutejs/agent-exchange-webauthn",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Request-bound, user-verified WebAuthn approvals for @absolutejs/agent-exchange.",
   "type": "module",
   "license": "Apache-2.0",
@@ -48,7 +48,7 @@
     "typescript": "^5.9.0"
   },
   "peerDependencies": {
-    "@absolutejs/agent-exchange": ">=0.2.0 <0.3",
+    "@absolutejs/agent-exchange": ">=0.2.0 <0.4",
     "@absolutejs/auth": ">=0.73.1 <0.74"
   }
 }

@@ -14,6 +14,8 @@ Interchangeable, security-profiled providers for
   memory, Redis, and PostgreSQL authorization-session stores.
 - [`@absolutejs/agent-exchange-provider-conformance`](./conformance) evaluates
   provider security capabilities and verifies DPoP proofs.
+- [`@absolutejs/agent-exchange-broker`](./broker) confines an upstream bearer
+  token to one tenant, exchange, provider, purpose, and deterministic operation.
 - [`@absolutejs/agent-exchange-google`](./google) and
   [`@absolutejs/agent-exchange-microsoft`](./microsoft) describe real BYO mailbox
   provider capabilities without upgrading their bearer-token boundaries.

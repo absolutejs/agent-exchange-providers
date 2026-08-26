@@ -1,0 +1,43 @@
+{
+  "name": "@absolutejs/agent-exchange-broker",
+  "version": "0.1.0",
+  "description": "Tenant-fenced, one-time token-confined broker contracts for AbsoluteJS Agent Exchange.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "author": "Alex Kahn",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/absolutejs/agent-exchange-providers.git",
+    "directory": "broker"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "SECURITY.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "rm -rf dist && bun build src/index.ts --outdir dist --target=node --external @absolutejs/agent-exchange && tsc --project tsconfig.build.json",
+    "format:check": "prettier --check \"./**/*.{ts,json,md}\"",
+    "test": "bun test tests/",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@absolutejs/agent-exchange": ">=0.3.0 <0.4"
+  },
+  "devDependencies": {
+    "@absolutejs/agent-exchange": "0.3.0"
+  }
+}
