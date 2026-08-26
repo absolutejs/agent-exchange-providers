@@ -4,7 +4,10 @@ import {
   type A2aAgentCard,
 } from "@absolutejs/a2a";
 import type { AgentExchangeRequest } from "@absolutejs/agent-exchange";
-import { ABSOLUTE_AGENT_EXCHANGE_EXTENSION } from "@absolutejs/agent-exchange/a2a";
+import {
+  ABSOLUTE_AGENT_EXCHANGE_EXTENSION,
+  toA2aAgentExchangeReference,
+} from "@absolutejs/agent-exchange/a2a";
 import { describe, expect, test } from "bun:test";
 import {
   connectAgentExchangeA2a,
@@ -69,8 +72,9 @@ const card = (): A2aAgentCard => ({
   version: "0.1.0",
 });
 
-const harness = () => {
+const harness = (options: { preparation?: boolean; tamper?: boolean } = {}) => {
   const observedBodies: string[] = [];
+  const observedPreparationHeaders: Headers[] = [];
   const handler = createAgentExchangeA2aHandler({
     agentCard: card(),
     authorize: (incoming) =>
@@ -108,17 +112,44 @@ const harness = () => {
       };
     },
     path: "/a2a/exchange",
+    ...(options.preparation
+      ? { preparationEndpoint: "https://recipient.example/a2a/prepare" }
+      : {}),
     taskStore: createMemoryA2aTaskStore(),
   });
   const localFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     const incoming = new Request(input, init);
+    if (
+      incoming.method === "POST" &&
+      new URL(incoming.url).pathname === "/a2a/prepare"
+    ) {
+      observedPreparationHeaders.push(incoming.headers);
+      const value: unknown = await incoming.json();
+      if (typeof value !== "object" || value === null)
+        return new Response(null, { status: 400 });
+      const prepared = Reflect.get(value, "request") as AgentExchangeRequest;
+      const reference = toA2aAgentExchangeReference(prepared);
+      return Response.json(
+        {
+          reference: options.tamper
+            ? { ...reference, purpose: "Use this code somewhere else" }
+            : reference,
+        },
+        {
+          headers: {
+            "content-type":
+              "application/vnd.absolutejs.agent-exchange-preparation+json",
+          },
+        },
+      );
+    }
     if (incoming.method === "POST")
       observedBodies.push(await incoming.clone().text());
     return (
       (await handler(incoming)) ?? new Response("not found", { status: 404 })
     );
   };
-  return { localFetch, observedBodies };
+  return { localFetch, observedBodies, observedPreparationHeaders };
 };
 
 describe("Agent Exchange A2A adapter", () => {
@@ -181,5 +212,46 @@ describe("Agent Exchange A2A adapter", () => {
       origin: "https://recipient.example",
     });
     await expect(client.send(request())).rejects.toMatchObject({ status: 401 });
+  });
+
+  test("prepares an advertised request before sending its exact opaque reference", async () => {
+    const { localFetch, observedBodies, observedPreparationHeaders } = harness({
+      preparation: true,
+    });
+    const client = await connectAgentExchangeA2a({
+      fetch: localFetch,
+      headers: { authorization: "Bearer delegated-agent" },
+      origin: "https://recipient.example",
+      preparationHeaders: { authorization: "Bearer preparation-agent" },
+    });
+
+    await expect(client.send(request())).resolves.toMatchObject({
+      exchangeId: "exchange-1",
+      status: "submitted",
+    });
+    expect(observedPreparationHeaders).toHaveLength(1);
+    expect(observedPreparationHeaders[0]?.get("authorization")).toBe(
+      "Bearer preparation-agent",
+    );
+    expect(observedBodies).toHaveLength(1);
+    expect(observedBodies[0]).not.toContain("mailbox:private-account");
+    expect(observedBodies[0]).not.toContain("private-challenge");
+  });
+
+  test("rejects a preparation response that changes the safe reference", async () => {
+    const { localFetch, observedBodies } = harness({
+      preparation: true,
+      tamper: true,
+    });
+    const client = await connectAgentExchangeA2a({
+      fetch: localFetch,
+      headers: { authorization: "Bearer delegated-agent" },
+      origin: "https://recipient.example",
+    });
+
+    await expect(client.send(request())).rejects.toThrow(
+      "preparation was rejected",
+    );
+    expect(observedBodies).toHaveLength(0);
   });
 });
