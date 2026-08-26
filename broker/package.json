@@ -1,6 +1,6 @@
 {
   "name": "@absolutejs/agent-exchange-broker",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Tenant-fenced, one-time token-confined broker contracts for AbsoluteJS Agent Exchange.",
   "type": "module",
   "license": "Apache-2.0",
@@ -35,9 +35,9 @@
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
-    "@absolutejs/agent-exchange": ">=0.3.0 <0.4"
+    "@absolutejs/agent-exchange": ">=0.4.3 <0.5"
   },
   "devDependencies": {
-    "@absolutejs/agent-exchange": "0.3.0"
+    "@absolutejs/agent-exchange": "0.4.3"
   }
 }

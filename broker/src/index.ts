@@ -83,11 +83,14 @@ const assertRequest = (
 ): void => {
   if (
     !validIdentifier(tenantId) ||
-    request.assurance.approval !== "webauthn-verifier-bound" ||
+    (request.assurance.approval !== "webauthn-verifier-bound" &&
+      request.assurance.approval !== "standing-mandate") ||
     request.assurance.credential !== "token-confined-broker" ||
     request.assurance.execution !== "purpose-bound" ||
     request.processingMode !== "tool-confined" ||
     request.maximumUses !== 1 ||
+    (request.assurance.approval === "standing-mandate" &&
+      !validIdentifier(request.mandateId ?? "")) ||
     request.expiresAt <= now ||
     !validIdentifier(request.exchangeId) ||
     !validIdentifier(request.requester.subject) ||

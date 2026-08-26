@@ -92,6 +92,31 @@ describe("token-confined broker", () => {
     ).rejects.toThrow("operation failed");
   });
 
+  test("accepts an already-verified standing mandate request", async () => {
+    const broker = createTokenConfinedBroker({
+      credentials: { resolve: async () => ({ accessToken: "secret" }) },
+      now: () => 2_000,
+      providers: {
+        google: { execute: async () => ({ status: "submitted" }) },
+      },
+      store: createMemoryTokenConfinedBrokerStore(),
+    });
+    await expect(
+      broker.execute({
+        request: {
+          ...request("xchg_mandate"),
+          assurance: {
+            approval: "standing-mandate",
+            credential: "token-confined-broker",
+            execution: "purpose-bound",
+          },
+          mandateId: "mandate-1",
+        },
+        tenantId: "tenant-1",
+      }),
+    ).resolves.toMatchObject({ status: "submitted" });
+  });
+
   test("rejects sender-constrained and policy assurance at this boundary", async () => {
     const broker = createTokenConfinedBroker({
       credentials: { resolve: async () => ({ accessToken: "secret" }) },
