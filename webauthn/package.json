@@ -1,0 +1,50 @@
+{
+  "name": "@absolutejs/agent-exchange-webauthn",
+  "version": "0.1.0",
+  "description": "Request-bound, user-verified WebAuthn approvals for @absolutejs/agent-exchange.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "author": "Alex Kahn",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/absolutejs/agent-exchange-providers.git",
+    "directory": "webauthn"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "SECURITY.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "rm -rf dist && bun build src/index.ts --outdir dist --root src --sourcemap --target=browser --external @absolutejs/agent-exchange --external @absolutejs/auth && tsc --project tsconfig.build.json",
+    "check:package": "bun run format:check && bun run typecheck && bun run test && bun run build",
+    "format": "prettier --write \"./**/*.{ts,json,md}\"",
+    "format:check": "prettier --check \"./**/*.{ts,json,md}\"",
+    "release": "bun run check:package && npm publish --access public",
+    "test": "bun test tests/",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@absolutejs/agent-exchange": "0.2.0",
+    "@absolutejs/auth": "0.73.1",
+    "@types/bun": "^1.3.14",
+    "typescript": "^5.9.0"
+  },
+  "peerDependencies": {
+    "@absolutejs/agent-exchange": ">=0.2.0 <0.3",
+    "@absolutejs/auth": ">=0.73.1 <0.74"
+  }
+}
