@@ -16,6 +16,11 @@ Interchangeable, security-profiled providers for
   provider security capabilities and verifies DPoP proofs.
 - [`@absolutejs/agent-exchange-broker`](./broker) confines an upstream bearer
   token to one tenant, exchange, provider, purpose, and deterministic operation.
+- [`@absolutejs/agent-exchange-mandate-webcrypto`](./mandate-webcrypto) signs and
+  verifies explicitly typed ES256 JWS standing mandates with non-exportable keys.
+- [`@absolutejs/agent-exchange-mandate-stores`](./mandate-stores) provides atomic
+  PostgreSQL and Redis registration, use-limit, replay, expiry, and revocation
+  storage.
 - [`@absolutejs/agent-exchange-destinations`](./destinations) selects one
   destination by exact origin, operation, and secret kind and rejects ambiguous
   or secret-reflecting adapters.

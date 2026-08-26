@@ -14,6 +14,7 @@ protocol. “MUST” below describes what these packages enforce.
 | Fine-grained authorization      | [RFC 9396](https://www.rfc-editor.org/rfc/rfc9396)                                                                                  | Require explicit `type`, `actions`, and `locations` and integrity-protect them through PAR.                                                                              |
 | Sender constraint               | [RFC 9449](https://www.rfc-editor.org/rfc/rfc9449)                                                                                  | Accept only `token_type=DPoP`, support one server-nonce retry, and require a host-supplied signer whose private key stays outside the package.                           |
 | Delegation semantics            | [RFC 8693](https://www.rfc-editor.org/rfc/rfc8693)                                                                                  | Future token-exchange adapters must distinguish delegation from impersonation and preserve the actor chain; this first release does not silently perform token exchange. |
+| Signed standing mandates        | [RFC 7515](https://www.rfc-editor.org/rfc/rfc7515), [RFC 8785](https://www.rfc-editor.org/rfc/rfc8785)                              | Use an explicitly typed, ES256 compact JWS over canonical JSON; resolve `kid` only inside the independently trusted issuer boundary and reject algorithm substitution.   |
 | Authorization-server metadata   | [RFC 8414](https://www.rfc-editor.org/rfc/rfc8414)                                                                                  | Treat the configured HTTPS issuer as an exact security boundary. Provider discovery/adapters may populate the profile but may not weaken it.                             |
 | HTTP semantics                  | [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110)                                                                                  | Destination endpoints are fixed HTTPS deployment configuration; the HTTP adapter uses POST, rejects redirects, omits ambient credentials, and discards response bodies.  |
 
@@ -27,6 +28,13 @@ the bearer value.
 profile: approval is bound to the verifier and exact request, the resulting OAuth
 credential is bound to a recipient-held key, and execution is bound to the
 declared resource and operation.
+
+`standing-mandate + token-confined-broker + purpose-bound` is the unattended
+automation profile. A user-verified WebAuthn ceremony signs a bounded mandate;
+subsequent uses require exact subject, actor, audience, account, action, location,
+purpose, risk, and secret-kind matches plus atomic revocation and use accounting.
+It is phishing-resistant owner authorization, but it does not turn an upstream
+email OTP or bearer token into a phishing-resistant credential.
 
 Security is the minimum of these three dimensions. No adapter may upgrade a weak
 dimension merely because another dimension is strong.

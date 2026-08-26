@@ -8,6 +8,8 @@
     "destinations",
     "google",
     "http-destination",
+    "mandate-stores",
+    "mandate-webcrypto",
     "microsoft",
     "oauth",
     "oauth-stores",
@@ -15,7 +17,7 @@
     "webauthn"
   ],
   "scripts": {
-    "build": "bun run --cwd conformance build && bun run --cwd destinations build && bun run --cwd oauth build && bun run --cwd broker build && bun run --cwd webauthn build && bun run --cwd oauth-webcrypto build && bun run --cwd oauth-stores build && bun run --cwd google build && bun run --cwd microsoft build && bun run --cwd http-destination build",
+    "build": "bun run --cwd conformance build && bun run --cwd destinations build && bun run --cwd oauth build && bun run --cwd broker build && bun run --cwd webauthn build && bun run --cwd oauth-webcrypto build && bun run --cwd oauth-stores build && bun run --cwd mandate-webcrypto build && bun run --cwd mandate-stores build && bun run --cwd google build && bun run --cwd microsoft build && bun run --cwd http-destination build",
     "check:package": "bun run format:check && bun run typecheck && bun run test && bun run build",
     "format": "prettier --write \"./**/*.{ts,json,md}\"",
     "format:check": "prettier --check \"./**/*.{ts,json,md}\"",
