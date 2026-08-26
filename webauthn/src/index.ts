@@ -11,6 +11,7 @@ const MAX_CREDENTIALS = 20;
 const MAX_CREDENTIAL_ID_LENGTH = 2048;
 
 export type WebAuthnAgentExchangeApprovalProviderOptions = {
+  readonly allowInsecureLocalhost?: boolean;
   readonly adapter: WebAuthnAdapter;
   readonly credentialStore: WebAuthnCredentialStore;
   readonly now?: () => number;
@@ -26,10 +27,18 @@ const fail = (): never => {
   throw new Error("WebAuthn approval failed");
 };
 
-const validatedOrigin = (value: string): URL => {
+const validatedOrigin = (
+  value: string,
+  allowInsecureLocalhost: boolean,
+): URL => {
   const url = new URL(value);
+  const isLocalhost =
+    url.hostname === "localhost" ||
+    url.hostname === "127.0.0.1" ||
+    url.hostname === "[::1]";
   if (
-    url.protocol !== "https:" ||
+    (url.protocol !== "https:" &&
+      !(allowInsecureLocalhost && url.protocol === "http:" && isLocalhost)) ||
     url.username !== "" ||
     url.password !== "" ||
     url.pathname !== "/" ||
@@ -43,14 +52,23 @@ const validatedOrigin = (value: string): URL => {
   return url;
 };
 
-const assertRpId = (origin: URL, rpId: string): void => {
+const assertRpId = (
+  origin: URL,
+  rpId: string,
+  allowInsecureLocalhost: boolean,
+): void => {
   const normalized = rpId.toLowerCase();
+  const isAllowedLocalhost =
+    allowInsecureLocalhost &&
+    (normalized === "localhost" || normalized === "127.0.0.1") &&
+    origin.hostname === normalized;
   if (
     normalized === "" ||
-    !normalized.includes(".") ||
     normalized.includes(":") ||
-    (origin.hostname !== normalized &&
-      !origin.hostname.endsWith(`.${normalized}`))
+    (!isAllowedLocalhost &&
+      (!normalized.includes(".") ||
+        (origin.hostname !== normalized &&
+          !origin.hostname.endsWith(`.${normalized}`))))
   ) {
     throw new Error("rpId must equal or be a registrable suffix of origin");
   }
@@ -73,10 +91,11 @@ const responseCredentialId = (response: unknown): string => {
 export const createWebAuthnAgentExchangeApprovalProvider = (
   options: WebAuthnAgentExchangeApprovalProviderOptions,
 ): AgentExchangeApprovalProvider => {
-  const origin = validatedOrigin(options.origin);
+  const allowInsecureLocalhost = options.allowInsecureLocalhost === true;
+  const origin = validatedOrigin(options.origin, allowInsecureLocalhost);
   const expectedOrigin = origin.origin;
   const rpId = options.rpId.toLowerCase();
-  assertRpId(origin, rpId);
+  assertRpId(origin, rpId, allowInsecureLocalhost);
   const now = options.now ?? Date.now;
 
   const resolveOwnedCredentials = async (

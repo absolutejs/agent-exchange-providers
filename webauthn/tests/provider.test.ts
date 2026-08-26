@@ -134,4 +134,23 @@ describe("WebAuthn Agent Exchange approval provider", () => {
       }),
     ).rejects.toThrow("WebAuthn approval failed");
   });
+
+  test("allows HTTP localhost only behind the explicit development flag", () => {
+    const options = {
+      adapter: {} as WebAuthnAdapter,
+      credentialStore: {} as WebAuthnCredentialStore,
+      origin: "http://localhost:3000",
+      resolveUserId: () => "user-1",
+      rpId: "localhost",
+    };
+    expect(() => createWebAuthnAgentExchangeApprovalProvider(options)).toThrow(
+      "HTTPS origin",
+    );
+    expect(() =>
+      createWebAuthnAgentExchangeApprovalProvider({
+        ...options,
+        allowInsecureLocalhost: true,
+      }),
+    ).not.toThrow();
+  });
 });

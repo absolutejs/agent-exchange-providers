@@ -19,3 +19,6 @@ safe signature-counter progression. It does not persist raw assertions.
 
 Use the resulting provider with the phishing-resistant assurance profile in
 `@absolutejs/agent-exchange@0.2`.
+
+For local development only, `allowInsecureLocalhost: true` permits an HTTP
+`localhost` origin and RP ID. It does not permit arbitrary HTTP hosts.
