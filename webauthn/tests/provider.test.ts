@@ -1,11 +1,18 @@
 import { describe, expect, test } from "bun:test";
-import type { AgentExchangeRequest } from "@absolutejs/agent-exchange";
+import {
+  agentExchangeMandateApprovalChallenge,
+  type AgentExchangeRequest,
+  type AgentExchangeStandingMandateDraft,
+} from "@absolutejs/agent-exchange";
 import type {
   WebAuthnAdapter,
   WebAuthnCredential,
   WebAuthnCredentialStore,
 } from "@absolutejs/auth";
-import { createWebAuthnAgentExchangeApprovalProvider } from "../src";
+import {
+  createWebAuthnAgentExchangeApprovalProvider,
+  createWebAuthnAgentExchangeMandateApprovalProvider,
+} from "../src";
 
 const request = {
   actionId: "act_1",
@@ -152,5 +159,102 @@ describe("WebAuthn Agent Exchange approval provider", () => {
         allowInsecureLocalhost: true,
       }),
     ).not.toThrow();
+  });
+});
+
+const mandateDraft: AgentExchangeStandingMandateDraft = {
+  audience: {
+    agentId: "mailbox-agent",
+    authority: "https://recipient.example",
+    subject: "user-1",
+  },
+  expiresAt: 10_000,
+  grants: [
+    {
+      accountRef: "mailbox-1",
+      operation: "verification.submit",
+      origin: "https://accounts.example",
+      provider: "gmail",
+      purpose: "Complete sign-in",
+      risk: "authentication",
+      secretKind: "email-one-time-code",
+    },
+  ],
+  issuer: { authority: "https://app.example.com", subject: "user-1" },
+  mandateId: "mandate-1",
+  maximumUses: 5,
+  notBefore: 500,
+  requester: {
+    agentId: "requester-agent",
+    authority: "https://requester.example",
+    subject: "requester-owner",
+  },
+};
+
+describe("WebAuthn standing mandate approval provider", () => {
+  test("recomputes the complete draft challenge and requires UV", async () => {
+    let saved: WebAuthnCredential | undefined;
+    const adapter: WebAuthnAdapter = {
+      createAuthenticationOptions: async (input) => ({
+        challenge: input.challenge ?? "wrong",
+        options: { userVerification: input.userVerification },
+      }),
+      createRegistrationOptions: async () => ({ challenge: "x", options: {} }),
+      verifyAuthentication: async () => ({ newCounter: 5, verified: true }),
+      verifyRegistration: async () => ({ verified: false }),
+    };
+    const provider = createWebAuthnAgentExchangeMandateApprovalProvider({
+      adapter,
+      credentialStore: {
+        getCredential: async () => credential,
+        listCredentialsByUser: async () => [credential],
+        removeCredential: async () => {},
+        saveCredential: async (value) => {
+          saved = value;
+        },
+      },
+      now: () => 500,
+      origin: "https://app.example.com",
+      resolveUserId: ({ subject }) => subject,
+      rpId: "example.com",
+    });
+    const challenge = await agentExchangeMandateApprovalChallenge(mandateDraft);
+    await expect(
+      provider.begin({
+        challenge,
+        draft: mandateDraft,
+        subject: "user-1",
+        verifierOrigin: "https://app.example.com",
+      }),
+    ).resolves.toMatchObject({ challenge });
+    await expect(
+      provider.verify({
+        challenge,
+        draft: mandateDraft,
+        response: { id: "credential-1" },
+        subject: "user-1",
+        verifierOrigin: "https://app.example.com",
+      }),
+    ).resolves.toMatchObject({ userVerified: true });
+    expect(saved).toMatchObject({ counter: 5, lastUsedAt: 500 });
+  });
+
+  test("rejects a challenge for a broader draft", async () => {
+    const provider = createWebAuthnAgentExchangeMandateApprovalProvider({
+      adapter: {} as WebAuthnAdapter,
+      credentialStore: {} as WebAuthnCredentialStore,
+      origin: "https://app.example.com",
+      resolveUserId: () => "user-1",
+      rpId: "example.com",
+    });
+    const challenge = await agentExchangeMandateApprovalChallenge(mandateDraft);
+    await expect(
+      provider.begin({
+        challenge,
+        draft: { ...mandateDraft, maximumUses: 6 },
+        subject: "user-1",
+        verifierOrigin: "https://app.example.com",
+      }),
+    ).rejects.toThrow("WebAuthn approval failed");
   });
 });

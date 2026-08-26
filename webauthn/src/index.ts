@@ -1,7 +1,9 @@
 import type {
   AgentExchangeApprovalProvider,
   AgentExchangeRequest,
+  AgentExchangeStandingMandateDraft,
 } from "@absolutejs/agent-exchange";
+import { agentExchangeMandateApprovalChallenge } from "@absolutejs/agent-exchange";
 import type {
   WebAuthnAdapter,
   WebAuthnCredentialStore,
@@ -18,6 +20,41 @@ export type WebAuthnAgentExchangeApprovalProviderOptions = {
   readonly origin: string;
   readonly resolveUserId: (input: {
     readonly request: AgentExchangeRequest;
+    readonly subject: string;
+  }) => Promise<string> | string;
+  readonly rpId: string;
+};
+
+export type AgentExchangeMandateApprovalProvider = {
+  readonly begin: (input: {
+    readonly challenge: string;
+    readonly draft: AgentExchangeStandingMandateDraft;
+    readonly subject: string;
+    readonly verifierOrigin: string;
+  }) => Promise<{ readonly challenge: string; readonly options: unknown }>;
+  readonly verify: (input: {
+    readonly challenge: string;
+    readonly draft: AgentExchangeStandingMandateDraft;
+    readonly response: unknown;
+    readonly subject: string;
+    readonly verifierOrigin: string;
+  }) => Promise<{
+    readonly credentialId: string;
+    readonly rpId: string;
+    readonly subject: string;
+    readonly userVerified: true;
+    readonly verifierOrigin: string;
+  }>;
+};
+
+export type WebAuthnAgentExchangeMandateApprovalProviderOptions = {
+  readonly allowInsecureLocalhost?: boolean;
+  readonly adapter: WebAuthnAdapter;
+  readonly credentialStore: WebAuthnCredentialStore;
+  readonly now?: () => number;
+  readonly origin: string;
+  readonly resolveUserId: (input: {
+    readonly draft: AgentExchangeStandingMandateDraft;
     readonly subject: string;
   }) => Promise<string> | string;
   readonly rpId: string;
@@ -190,6 +227,114 @@ export const createWebAuthnAgentExchangeApprovalProvider = (
         credentialId,
         rpId,
         subject,
+        userVerified: true,
+        verifierOrigin: expectedOrigin,
+      };
+    },
+  };
+};
+
+export const createWebAuthnAgentExchangeMandateApprovalProvider = (
+  options: WebAuthnAgentExchangeMandateApprovalProviderOptions,
+): AgentExchangeMandateApprovalProvider => {
+  const allowInsecureLocalhost = options.allowInsecureLocalhost === true;
+  const origin = validatedOrigin(options.origin, allowInsecureLocalhost);
+  const expectedOrigin = origin.origin;
+  const rpId = options.rpId.toLowerCase();
+  assertRpId(origin, rpId, allowInsecureLocalhost);
+  const now = options.now ?? Date.now;
+
+  const resolveOwnedCredentials = async (
+    draft: AgentExchangeStandingMandateDraft,
+    subject: string,
+  ) => {
+    const userId = await options.resolveUserId({ draft, subject });
+    if (typeof userId !== "string" || userId.length === 0) return fail();
+    const credentials =
+      await options.credentialStore.listCredentialsByUser(userId);
+    if (credentials.length === 0 || credentials.length > MAX_CREDENTIALS)
+      return fail();
+    return { credentials, userId };
+  };
+
+  const assertBound = async (input: {
+    readonly challenge: string;
+    readonly draft: AgentExchangeStandingMandateDraft;
+    readonly subject: string;
+    readonly verifierOrigin: string;
+  }) => {
+    if (
+      input.verifierOrigin !== expectedOrigin ||
+      input.draft.issuer.authority !== expectedOrigin ||
+      input.draft.issuer.subject !== input.subject ||
+      input.challenge !==
+        (await agentExchangeMandateApprovalChallenge(input.draft))
+    )
+      return fail();
+  };
+
+  return {
+    begin: async (input) => {
+      await assertBound(input);
+      const { credentials } = await resolveOwnedCredentials(
+        input.draft,
+        input.subject,
+      );
+      const generated = await options.adapter.createAuthenticationOptions({
+        allowCredentials: credentials.map(({ credentialId, transports }) => ({
+          id: credentialId,
+          ...(transports === undefined ? {} : { transports }),
+        })),
+        challenge: input.challenge,
+        rpId,
+        userVerification: "required",
+      });
+      if (generated.challenge !== input.challenge) return fail();
+      return { challenge: input.challenge, options: generated.options };
+    },
+    verify: async (input) => {
+      await assertBound(input);
+      const { credentials, userId } = await resolveOwnedCredentials(
+        input.draft,
+        input.subject,
+      );
+      const credentialId = responseCredentialId(input.response);
+      const credential = credentials.find(
+        (value) => value.credentialId === credentialId,
+      );
+      if (credential === undefined || credential.userId !== userId)
+        return fail();
+      const result = await options.adapter.verifyAuthentication({
+        credential: {
+          counter: credential.counter,
+          credentialId: credential.credentialId,
+          publicKey: credential.publicKey,
+          ...(credential.transports === undefined
+            ? {}
+            : { transports: credential.transports }),
+        },
+        expectedChallenge: input.challenge,
+        expectedOrigin,
+        expectedRPID: rpId,
+        requireUserVerification: true,
+        response: input.response,
+      });
+      if (
+        !result.verified ||
+        result.newCounter === undefined ||
+        !Number.isSafeInteger(result.newCounter) ||
+        result.newCounter < credential.counter
+      )
+        return fail();
+      await options.credentialStore.saveCredential({
+        ...credential,
+        counter: result.newCounter,
+        lastUsedAt: now(),
+      });
+      return {
+        credentialId,
+        rpId,
+        subject: input.subject,
         userVerified: true,
         verifierOrigin: expectedOrigin,
       };
