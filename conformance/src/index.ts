@@ -100,16 +100,6 @@ export const assertPhishingResistantOAuthProvider = (
     );
 };
 
-const fromBase64Url = (value: string): Uint8Array => {
-  if (!/^[A-Za-z0-9_-]+$/u.test(value)) throw new Error("invalid base64url");
-  const padded = value
-    .replaceAll("-", "+")
-    .replaceAll("_", "/")
-    .padEnd(Math.ceil(value.length / 4) * 4, "=");
-  const binary = atob(padded);
-  return Uint8Array.from(binary, (character) => character.charCodeAt(0));
-};
-
 const toBase64Url = (value: Uint8Array): string => {
   let binary = "";
   for (const byte of value) binary += String.fromCharCode(byte);
@@ -117,6 +107,28 @@ const toBase64Url = (value: Uint8Array): string => {
     .replaceAll("+", "-")
     .replaceAll("/", "_")
     .replace(/=+$/u, "");
+};
+
+const fromBase64Url = (value: string): Uint8Array => {
+  if (!/^[A-Za-z0-9_-]+$/u.test(value) || value.length % 4 === 1)
+    throw new Error("invalid base64url");
+  let binary: string;
+  try {
+    binary = atob(
+      value
+        .replaceAll("-", "+")
+        .replaceAll("_", "/")
+        .padEnd(Math.ceil(value.length / 4) * 4, "="),
+    );
+  } catch {
+    throw new Error("invalid base64url");
+  }
+  const decoded = Uint8Array.from(binary, (character) =>
+    character.charCodeAt(0),
+  );
+  if (toBase64Url(decoded) !== value)
+    throw new Error("non-canonical base64url");
+  return decoded;
 };
 
 const parseJsonPart = (value: string): Record<string, unknown> => {
@@ -210,10 +222,16 @@ export const verifyDpopProof = async (input: {
     false,
     ["verify"],
   );
+  let signature: Uint8Array;
+  try {
+    signature = fromBase64Url(signaturePart);
+  } catch {
+    throw new Error("invalid DPoP signature");
+  }
   const verified = await crypto.subtle.verify(
     { hash: "SHA-256", name: "ECDSA" },
     publicKey,
-    asArrayBuffer(fromBase64Url(signaturePart)),
+    asArrayBuffer(signature),
     encoder.encode(`${headerPart}.${payloadPart}`),
   );
   if (!verified) throw new Error("invalid DPoP signature");

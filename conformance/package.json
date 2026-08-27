@@ -1,6 +1,6 @@
 {
   "name": "@absolutejs/agent-exchange-provider-conformance",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "OAuth, DPoP, and black-box A2A security conformance checks for Agent Exchange providers.",
   "type": "module",
   "license": "Apache-2.0",

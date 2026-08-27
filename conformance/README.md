@@ -60,4 +60,6 @@ that an email/SMS bearer code is phishing-resistant.
 issuer-identification, PAR, S256 PKCE, RAR, resource-indicator, and
 sender-constraint capabilities. `verifyDpopProof()` independently validates the
 ES256 proof, public key, method, normalized target URI, timestamp, nonce, and
-access-token hash.
+access-token hash. JWT segments must use canonical unpadded base64url encoding;
+alternate strings that decode to the same bytes are rejected so proof identity
+cannot be aliased through unused padding bits.
