@@ -13,11 +13,11 @@ import type {
   SecureMessagingClient,
 } from "@absolutejs/secure-messaging";
 
-export const AGENT_EXCHANGE_SECURE_MESSAGING_CONTRACT = 1 as const;
+export const AGENT_EXCHANGE_SECURE_MESSAGING_CONTRACT = 2 as const;
 export const AGENT_EXCHANGE_SECURE_MESSAGING_REQUEST_PURPOSE =
-  "org.absolutejs.agent-exchange.request.v1" as const;
+  "org.absolutejs.agent-exchange.request.v2" as const;
 export const AGENT_EXCHANGE_SECURE_MESSAGING_RECEIPT_PURPOSE =
-  "org.absolutejs.agent-exchange.receipt.v1" as const;
+  "org.absolutejs.agent-exchange.receipt.v2" as const;
 
 const DEFAULT_MAXIMUM_ENVELOPE_BYTES = 1_048_576;
 const DEFAULT_MAXIMUM_JWS_BYTES = 65_536;
@@ -37,12 +37,20 @@ export type AgentExchangeSecureMessagingRoute = {
 export type AgentExchangeSecureMessagingReceiptSaveResult =
   "conflict" | "duplicate" | "saved";
 
+export type AgentExchangeSecureMessagingReceiptRecord = {
+  readonly expiresAt: number;
+  readonly receipt: AgentExchangeReceipt;
+};
+
 export type AgentExchangeSecureMessagingReceiptStore = {
-  readonly get: (
-    exchangeId: string,
-  ) => Promise<AgentExchangeReceipt | undefined>;
+  readonly get: (input: {
+    readonly exchangeId: string;
+    readonly now: number;
+  }) => Promise<AgentExchangeSecureMessagingReceiptRecord | undefined>;
   readonly save: (
-    receipt: AgentExchangeReceipt,
+    input: AgentExchangeSecureMessagingReceiptRecord & {
+      readonly now: number;
+    },
   ) => Promise<AgentExchangeSecureMessagingReceiptSaveResult>;
 };
 
@@ -105,6 +113,7 @@ type RequestWireMessage = {
 
 type ReceiptWireMessage = {
   readonly contract: typeof AGENT_EXCHANGE_SECURE_MESSAGING_CONTRACT;
+  readonly expiresAt: number;
   readonly kind: "receipt";
   readonly receipt: AgentExchangeReceipt;
   readonly recipientDeviceId: string;
@@ -149,7 +158,7 @@ const base64urlEncode = (bytes: Uint8Array) => {
 
 const base64urlDecode = (value: unknown, maximumBytes: number) => {
   const encoded = boundedString(value, Math.ceil((maximumBytes * 4) / 3) + 4);
-  if (!/^[A-Za-z0-9_-]+$/u.test(encoded))
+  if (!/^[A-Za-z0-9_-]+$/u.test(encoded) || encoded.length % 4 === 1)
     throw new Error("Agent Exchange secure-messaging message was rejected");
   const padding = "=".repeat((4 - (encoded.length % 4)) % 4);
   let binary: string;
@@ -160,7 +169,12 @@ const base64urlDecode = (value: unknown, maximumBytes: number) => {
   }
   if (binary.length === 0 || binary.length > maximumBytes)
     throw new Error("Agent Exchange secure-messaging message was rejected");
-  return Uint8Array.from(binary, (character) => character.charCodeAt(0));
+  const decoded = Uint8Array.from(binary, (character) =>
+    character.charCodeAt(0),
+  );
+  if (base64urlEncode(decoded) !== encoded)
+    throw new Error("Agent Exchange secure-messaging message was rejected");
+  return decoded;
 };
 
 const assertIdentityShape = (value: unknown) => {
@@ -319,13 +333,23 @@ const parseWireMessage = (
   if (message.kind === "receipt") {
     exactKeys(message, [
       "contract",
+      "expiresAt",
       "kind",
       "receipt",
       "recipientDeviceId",
       "requesterDeviceId",
     ]);
+    const expiresAt = message.expiresAt;
+    if (
+      typeof expiresAt !== "number" ||
+      !Number.isSafeInteger(expiresAt) ||
+      expiresAt <= options.now ||
+      expiresAt - options.now > options.maximumTtlMs
+    )
+      throw new Error("Agent Exchange secure-messaging receipt was rejected");
     return Object.freeze({
       contract: AGENT_EXCHANGE_SECURE_MESSAGING_CONTRACT,
+      expiresAt,
       kind: "receipt",
       receipt: parseReceipt(message.receipt),
       recipientDeviceId: boundedString(
@@ -363,11 +387,13 @@ const encodeRequest = (
 
 const encodeReceipt = (
   receipt: AgentExchangeReceipt,
+  expiresAt: number,
   requesterDeviceId: string,
   recipientDeviceId: string,
 ) =>
   encode({
     contract: AGENT_EXCHANGE_SECURE_MESSAGING_CONTRACT,
+    expiresAt,
     kind: "receipt",
     receipt,
     recipientDeviceId,
@@ -414,14 +440,46 @@ const positiveLimit = (value: number, label: string) => {
 
 export const createMemoryAgentExchangeSecureMessagingReceiptStore =
   (): AgentExchangeSecureMessagingReceiptStore => {
-    const receipts = new Map<string, AgentExchangeReceipt>();
+    const receipts = new Map<
+      string,
+      AgentExchangeSecureMessagingReceiptRecord
+    >();
     return Object.freeze({
-      get: async (exchangeId) => receipts.get(exchangeId),
-      save: async (receipt) => {
+      get: async ({ exchangeId, now }) => {
+        const existing = receipts.get(exchangeId);
+        if (existing === undefined) return undefined;
+        if (existing.expiresAt <= now) {
+          receipts.delete(exchangeId);
+          return undefined;
+        }
+        return existing;
+      },
+      save: async ({ expiresAt, now, receipt }) => {
+        if (
+          !Number.isSafeInteger(expiresAt) ||
+          !Number.isSafeInteger(now) ||
+          expiresAt <= now
+        )
+          return "conflict";
         const existing = receipts.get(receipt.exchangeId);
-        if (existing !== undefined)
-          return sameReceipt(existing, receipt) ? "duplicate" : "conflict";
-        receipts.set(receipt.exchangeId, Object.freeze({ ...receipt }));
+        if (existing !== undefined && existing.expiresAt <= now)
+          receipts.delete(receipt.exchangeId);
+        const live = receipts.get(receipt.exchangeId);
+        if (live !== undefined)
+          return live.expiresAt === expiresAt &&
+            sameReceipt(live.receipt, receipt)
+            ? "duplicate"
+            : "conflict";
+        receipts.set(
+          receipt.exchangeId,
+          Object.freeze({
+            expiresAt,
+            receipt: Object.freeze({
+              ...receipt,
+              assurance: Object.freeze({ ...receipt.assurance }),
+            }),
+          }),
+        );
         return "saved";
       },
     });
@@ -459,11 +517,17 @@ export const createAgentExchangeSecureMessagingTransport = (
       const recipientDeviceId = request.recipient.deviceId;
       if (!requesterDeviceId || !recipientDeviceId)
         throw new AgentExchangeError("transport_failed");
-      const existing = await options.receipts.get(request.exchangeId);
+      const existing = await options.receipts.get({
+        exchangeId: request.exchangeId,
+        now: now(),
+      });
       if (existing !== undefined) {
-        if (!validReceiptFor(existing, request))
+        if (
+          existing.expiresAt !== request.expiresAt ||
+          !validReceiptFor(existing.receipt, request)
+        )
           throw new AgentExchangeError("transport_failed");
-        return existing;
+        return existing.receipt;
       }
       const currentTime = now();
       const ttlMs = request.expiresAt - currentTime;
@@ -499,11 +563,17 @@ export const createAgentExchangeSecureMessagingTransport = (
         plaintext.fill(0);
       }
       while (now() < request.expiresAt) {
-        const receipt = await options.receipts.get(request.exchangeId);
+        const receipt = await options.receipts.get({
+          exchangeId: request.exchangeId,
+          now: now(),
+        });
         if (receipt !== undefined) {
-          if (!validReceiptFor(receipt, request))
+          if (
+            receipt.expiresAt !== request.expiresAt ||
+            !validReceiptFor(receipt.receipt, request)
+          )
             throw new AgentExchangeError("transport_failed");
-          return receipt;
+          return receipt.receipt;
         }
         await sleep(Math.min(pollIntervalMs, request.expiresAt - now()));
       }
@@ -550,7 +620,11 @@ export const createAgentExchangeSecureMessagingHandler = (
         wire.requesterDeviceId !== options.localDeviceId
       )
         throw new Error("Agent Exchange secure-messaging receipt was rejected");
-      const saved = await options.receipts.save(wire.receipt);
+      const saved = await options.receipts.save({
+        expiresAt: wire.expiresAt,
+        now: now(),
+        receipt: wire.receipt,
+      });
       if (saved === "conflict")
         throw new Error("Agent Exchange secure-messaging receipt conflicted");
       return [];
@@ -592,6 +666,7 @@ export const createAgentExchangeSecureMessagingHandler = (
           id: `${request.exchangeId}:receipt`,
           plaintext: encodeReceipt(
             receipt,
+            request.expiresAt,
             requesterDeviceId,
             recipientDeviceId,
           ),

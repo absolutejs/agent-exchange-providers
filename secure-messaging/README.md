@@ -5,6 +5,9 @@ secure messaging. It carries the complete request, the already protected Agent
 Exchange envelope, and a standing-mandate JWS inside a `strict-e2ee` conversation.
 Only a redacted receipt returns.
 
+Protocol contract 2 binds the original request expiry into the authenticated
+receipt and durable record. It is intentionally incompatible with contract 1.
+
 ```ts
 const receipts = createMemoryAgentExchangeSecureMessagingReceiptStore();
 
@@ -41,8 +44,10 @@ strict no-extension wire format, and bounds every identifier, JWS, envelope, and
 frame lifetime.
 
 `createMemoryAgentExchangeSecureMessagingReceiptStore()` is for examples and
-tests. Production deployments should implement the same receipt-store contract
-with tenant-scoped durable storage and conflict detection.
+tests. Production deployments should use
+`@absolutejs/agent-exchange-secure-messaging-stores`. The store contract carries
+the authenticated request expiry and an explicit current time so backends can
+reject expired writes, hide expired reads, and expire durable records.
 
 The recipient must use `receiveAndHandle()`, not ordinary `receive()`. This
 atomically queues the encrypted receipt with the inbound replay receipt and

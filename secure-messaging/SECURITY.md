@@ -18,7 +18,8 @@ exchange ID as an idempotency key. A crash before the atomic secure-messaging
 state/outbox commit deliberately retries the request.
 
 Production receipt stores must be durable and tenant-scoped. They must reject a
-second, different receipt for the same exchange ID. Message plaintext buffers
+second, different receipt or expiry for the same exchange ID, reject expired
+writes, and hide expired reads. Message plaintext buffers
 are transferred to the handler and wiped by secure messaging; never log decoded
 requests, inner ciphertext, mandate JWS values, or receipts from an untrusted
 parser error.

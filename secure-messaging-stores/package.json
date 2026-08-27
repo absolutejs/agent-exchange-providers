@@ -1,16 +1,16 @@
 {
-  "name": "@absolutejs/agent-exchange-secure-messaging",
-  "version": "0.1.0",
-  "description": "Strict-E2EE request and receipt transport for model-blind AbsoluteJS Agent Exchange.",
+  "name": "@absolutejs/agent-exchange-secure-messaging-stores",
+  "version": "0.0.1",
+  "description": "Tenant-scoped atomic memory, Redis, and PostgreSQL receipt stores for Agent Exchange secure messaging.",
   "type": "module",
   "license": "Apache-2.0",
   "author": "Alex Kahn",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/absolutejs/agent-exchange-providers.git",
-    "directory": "secure-messaging"
+    "directory": "secure-messaging-stores"
   },
-  "homepage": "https://github.com/absolutejs/agent-exchange-providers/tree/main/secure-messaging",
+  "homepage": "https://github.com/absolutejs/agent-exchange-providers/tree/main/secure-messaging-stores",
   "bugs": {
     "url": "https://github.com/absolutejs/agent-exchange-providers/issues"
   },
@@ -21,10 +21,12 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
-    }
+    },
+    "./migrations/postgres.sql": "./migrations/001_receipts.sql"
   },
   "files": [
     "dist",
+    "migrations",
     "LICENSE",
     "README.md",
     "SECURITY.md"
@@ -33,8 +35,9 @@
     "access": "public"
   },
   "scripts": {
-    "build": "rm -rf dist && bun build src/index.ts --outdir dist --target=node --external @absolutejs/agent-exchange --external @absolutejs/secure-messaging && tsc --project tsconfig.build.json",
+    "build": "rm -rf dist && bun build src/index.ts --outdir dist --root src --sourcemap --target=browser --external @absolutejs/agent-exchange --external @absolutejs/agent-exchange-secure-messaging && tsc --project tsconfig.build.json",
     "check:package": "bun run format:check && bun run typecheck && bun run test && bun run build",
+    "format": "prettier --write \"./**/*.{ts,json,md}\"",
     "format:check": "prettier --check \"./**/*.{ts,json,md}\"",
     "release": "bun run check:package && npm publish --access public",
     "test": "bun test tests/",
@@ -42,10 +45,10 @@
   },
   "peerDependencies": {
     "@absolutejs/agent-exchange": ">=0.5.0 <0.6",
-    "@absolutejs/secure-messaging": ">=0.5.1 <0.6"
+    "@absolutejs/agent-exchange-secure-messaging": ">=0.1.0 <0.2"
   },
   "devDependencies": {
     "@absolutejs/agent-exchange": "0.5.0",
-    "@absolutejs/secure-messaging": "0.5.1"
+    "@absolutejs/agent-exchange-secure-messaging": "0.1.0"
   }
 }

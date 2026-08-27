@@ -156,7 +156,7 @@
     },
     "secure-messaging": {
       "name": "@absolutejs/agent-exchange-secure-messaging",
-      "version": "0.0.1",
+      "version": "0.1.0",
       "devDependencies": {
         "@absolutejs/agent-exchange": "0.5.0",
         "@absolutejs/secure-messaging": "0.5.1",
@@ -164,6 +164,18 @@
       "peerDependencies": {
         "@absolutejs/agent-exchange": ">=0.5.0 <0.6",
         "@absolutejs/secure-messaging": ">=0.5.1 <0.6",
+      },
+    },
+    "secure-messaging-stores": {
+      "name": "@absolutejs/agent-exchange-secure-messaging-stores",
+      "version": "0.0.1",
+      "devDependencies": {
+        "@absolutejs/agent-exchange": "0.5.0",
+        "@absolutejs/agent-exchange-secure-messaging": "0.1.0",
+      },
+      "peerDependencies": {
+        "@absolutejs/agent-exchange": ">=0.5.0 <0.6",
+        "@absolutejs/agent-exchange-secure-messaging": ">=0.1.0 <0.2",
       },
     },
     "webauthn": {
@@ -213,6 +225,8 @@
     "@absolutejs/agent-exchange-provider-conformance": ["@absolutejs/agent-exchange-provider-conformance@workspace:conformance"],
 
     "@absolutejs/agent-exchange-secure-messaging": ["@absolutejs/agent-exchange-secure-messaging@workspace:secure-messaging"],
+
+    "@absolutejs/agent-exchange-secure-messaging-stores": ["@absolutejs/agent-exchange-secure-messaging-stores@workspace:secure-messaging-stores"],
 
     "@absolutejs/agent-exchange-webauthn": ["@absolutejs/agent-exchange-webauthn@workspace:webauthn"],
 

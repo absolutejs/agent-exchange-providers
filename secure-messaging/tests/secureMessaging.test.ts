@@ -233,7 +233,7 @@ describe("Agent Exchange secure-messaging provider", () => {
     });
     const exchange = request();
     const value = {
-      contract: 1,
+      contract: 2,
       delivery: {
         authenticatedContext: await agentExchangeContext(exchange),
         envelope: "BwgJ",
@@ -263,13 +263,61 @@ describe("Agent Exchange secure-messaging provider", () => {
     expect(received).toBeFalse();
   });
 
+  test("rejects a non-canonical base64url envelope", async () => {
+    let received = false;
+    const handler = createAgentExchangeSecureMessagingHandler({
+      authorizeRequest: () => undefined,
+      localDeviceId: recipientDeviceId,
+      maximumTtlMs: 60_000,
+      now: () => now,
+      receipts: createMemoryAgentExchangeSecureMessagingReceiptStore(),
+      receiver: {
+        receive: async () => {
+          received = true;
+          return receipt();
+        },
+      },
+    });
+    const exchange = request();
+    await expect(
+      handler({
+        id: "exchange-1:request",
+        message: {
+          authenticatedContext: {
+            conversationId: "opaque-conversation-1",
+            expiresAt: now + 60_000,
+            purpose: AGENT_EXCHANGE_SECURE_MESSAGING_REQUEST_PURPOSE,
+            securityEpoch: 7,
+            senderId: requesterDeviceId,
+          },
+          plaintext: new TextEncoder().encode(
+            JSON.stringify({
+              contract: 2,
+              delivery: {
+                authenticatedContext: await agentExchangeContext(exchange),
+                envelope: "Bx",
+                recipientKeyId: "recipient-key-1",
+                request: exchange,
+              },
+              kind: "request",
+              mandateJws: "signed-standing-mandate",
+            }),
+          ),
+          senderCredential: Uint8Array.of(1),
+        },
+      }),
+    ).rejects.toThrow("message was rejected");
+    expect(received).toBeFalse();
+  });
+
   test("rejects wire extensions and conflicting durable receipts", async () => {
     const receipts = createMemoryAgentExchangeSecureMessagingReceiptStore();
-    expect(await receipts.save(receipt())).toBe("saved");
-    expect(await receipts.save(receipt())).toBe("duplicate");
-    expect(await receipts.save({ ...receipt(), completedAt: now + 2 })).toBe(
-      "conflict",
-    );
+    const save = (value: AgentExchangeReceipt, expiresAt = now + 60_000) =>
+      receipts.save({ expiresAt, now, receipt: value });
+    expect(await save(receipt())).toBe("saved");
+    expect(await save(receipt())).toBe("duplicate");
+    expect(await save({ ...receipt(), completedAt: now + 2 })).toBe("conflict");
+    expect(await save(receipt(), now + 59_999)).toBe("conflict");
 
     const handler = createAgentExchangeSecureMessagingHandler({
       authorizeRequest: () => undefined,
@@ -301,5 +349,37 @@ describe("Agent Exchange secure-messaging provider", () => {
         },
       }),
     ).rejects.toThrow("message was rejected");
+  });
+
+  test("rejects a durable receipt whose expiry is not request-bound", async () => {
+    const receipts = createMemoryAgentExchangeSecureMessagingReceiptStore();
+    await receipts.save({
+      expiresAt: now + 59_999,
+      now,
+      receipt: receipt(),
+    });
+    const transport = createAgentExchangeSecureMessagingTransport({
+      client: {
+        send: async () => {
+          throw new Error("must not send");
+        },
+      },
+      maximumTtlMs: 60_000,
+      now: () => now,
+      receipts,
+      resolveRoute: () => ({
+        conversationId: "opaque-conversation-1",
+        recipientDeviceId,
+      }),
+    });
+    const exchange = request();
+    await expect(
+      transport.deliver({
+        authenticatedContext: await agentExchangeContext(exchange),
+        envelope: Uint8Array.of(7),
+        recipientKeyId: "recipient-key-1",
+        request: exchange,
+      }),
+    ).rejects.toThrow("Protected exchange delivery failed");
   });
 });
