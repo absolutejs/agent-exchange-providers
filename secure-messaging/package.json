@@ -1,0 +1,51 @@
+{
+  "name": "@absolutejs/agent-exchange-secure-messaging",
+  "version": "0.0.1",
+  "description": "Strict-E2EE request and receipt transport for model-blind AbsoluteJS Agent Exchange.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "author": "Alex Kahn",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/absolutejs/agent-exchange-providers.git",
+    "directory": "secure-messaging"
+  },
+  "homepage": "https://github.com/absolutejs/agent-exchange-providers/tree/main/secure-messaging",
+  "bugs": {
+    "url": "https://github.com/absolutejs/agent-exchange-providers/issues"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "SECURITY.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "rm -rf dist && bun build src/index.ts --outdir dist --target=node --external @absolutejs/agent-exchange --external @absolutejs/secure-messaging && tsc --project tsconfig.build.json",
+    "check:package": "bun run format:check && bun run typecheck && bun run test && bun run build",
+    "format:check": "prettier --check \"./**/*.{ts,json,md}\"",
+    "release": "bun run check:package && npm publish --access public",
+    "test": "bun test tests/",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@absolutejs/agent-exchange": ">=0.5.0 <0.6",
+    "@absolutejs/secure-messaging": ">=0.5.1 <0.6"
+  },
+  "devDependencies": {
+    "@absolutejs/agent-exchange": "0.5.0",
+    "@absolutejs/secure-messaging": "0.5.1"
+  }
+}

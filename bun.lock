@@ -154,6 +154,18 @@
         "@absolutejs/agent-exchange-oauth": ">=0.3.0 <0.4",
       },
     },
+    "secure-messaging": {
+      "name": "@absolutejs/agent-exchange-secure-messaging",
+      "version": "0.0.1",
+      "devDependencies": {
+        "@absolutejs/agent-exchange": "0.5.0",
+        "@absolutejs/secure-messaging": "0.5.1",
+      },
+      "peerDependencies": {
+        "@absolutejs/agent-exchange": ">=0.5.0 <0.6",
+        "@absolutejs/secure-messaging": ">=0.5.1 <0.6",
+      },
+    },
     "webauthn": {
       "name": "@absolutejs/agent-exchange-webauthn",
       "version": "0.4.1",
@@ -200,6 +212,8 @@
 
     "@absolutejs/agent-exchange-provider-conformance": ["@absolutejs/agent-exchange-provider-conformance@workspace:conformance"],
 
+    "@absolutejs/agent-exchange-secure-messaging": ["@absolutejs/agent-exchange-secure-messaging@workspace:secure-messaging"],
+
     "@absolutejs/agent-exchange-webauthn": ["@absolutejs/agent-exchange-webauthn@workspace:webauthn"],
 
     "@absolutejs/auth": ["@absolutejs/auth@0.75.2", "", { "dependencies": { "@absolutejs/linked-providers": "0.0.6", "@absolutejs/manifest": "^0.10.0", "@neondatabase/serverless": "1.0.0", "@opentelemetry/api": "1.9.1", "@simplewebauthn/browser": "13.3.0", "citra": "0.29.13", "typebox": "^1.3.16" }, "peerDependencies": { "@node-saml/node-saml": ">=5.1.0 <6", "@simplewebauthn/server": ">=13.3.2 <14", "drizzle-orm": ">=1.0.0-rc.4 <2", "elysia": "^2.0.0-beta.6", "react": ">=18 <20", "solid-js": ">=1.9.14 <2", "svelte": ">=5.56.7 <6", "vue": ">=3.5.40 <4" }, "optionalPeers": ["@node-saml/node-saml", "@simplewebauthn/server", "react", "solid-js", "svelte", "vue"], "bin": { "absolute-auth": "dist/cli/migrate.js" } }, "sha512-Rt2N8IUJztBDS5Zj9+hBuxSATC6bCjdyrb3iK1G5QFRuBfuKF1Y4HWWd0Ds36jphrVvah65TZJbhTY0J/BQ0zA=="],
@@ -209,6 +223,8 @@
     "@absolutejs/linked-providers": ["@absolutejs/linked-providers@0.0.6", "", {}, "sha512-mk9vZLqUowxHo4dGuKjOU+MwI4/PxwlR9SehMdkivQv2QzoIYOO0vnIfPhc3TdNy+8YFQJggxk3UyErujrAu2A=="],
 
     "@absolutejs/manifest": ["@absolutejs/manifest@0.7.3", "", { "peerDependencies": { "@sinclair/typebox": ">=0.34.0 <0.35.0" }, "bin": { "absolute-manifest": "dist/cli.js" } }, "sha512-P0Tx5L+o4ZBBvmOz86JdjNYC1nUaCRgSlX8OgXzmGK0iSPL3gxdUUUyPKNUzjdQicu0Waj0MZHz1XIEBLtjTlw=="],
+
+    "@absolutejs/secure-messaging": ["@absolutejs/secure-messaging@0.5.1", "", { "dependencies": { "@absolutejs/e2ee": "0.8.0", "@absolutejs/manifest": "^0.9.0", "@sinclair/typebox": "^0.34.0" } }, "sha512-iAzCBjBWnOxCqtxASS5HtTvz/hOi4MIupKxLt5N/iiX/LHUF4BEvA5GwvOTV/de1e9ZD1G1+MmS9KzuexfPo4Q=="],
 
     "@neondatabase/serverless": ["@neondatabase/serverless@1.0.0", "", { "dependencies": { "@types/node": "^22.10.2", "@types/pg": "^8.8.0" } }, "sha512-XWmEeWpBXIoksZSDN74kftfTnXFEGZ3iX8jbANWBc+ag6dsiQuvuR4LgB0WdCOKMb5AQgjqgufc0TgAsZubUYw=="],
 
@@ -267,6 +283,10 @@
     "@absolutejs/auth/@absolutejs/manifest": ["@absolutejs/manifest@0.10.0", "", { "peerDependencies": { "typebox": ">=1.3.0 <2" }, "bin": { "absolute-manifest": "dist/cli.js" } }, "sha512-aBzi7PPFfEl51DdJfB2XXT5KHBiLlB0KeNHsU68XnfeqZmjOtFdxlcxYjbGep94sDTCgAbapNLCT+D4azDL5Eg=="],
 
     "@absolutejs/e2ee/@absolutejs/manifest": ["@absolutejs/manifest@0.9.0", "", { "peerDependencies": { "@sinclair/typebox": ">=0.34.0 <0.35.0" }, "bin": { "absolute-manifest": "dist/cli.js" } }, "sha512-naNDdwNoWQgJ3HuFbAu1UcOVR7SGpLBJz/seO8MMX32vrxk6esgzY7OB1CL8YDOegtI/EqQfcvnulnP66A9aGg=="],
+
+    "@absolutejs/secure-messaging/@absolutejs/e2ee": ["@absolutejs/e2ee@0.8.0", "", { "dependencies": { "@absolutejs/manifest": "^0.9.0", "@sinclair/typebox": "^0.34.0" } }, "sha512-POqferRMc0rfqsl2BItK+yFwc5118unC2FJYhDCf/lSt7C83uSzmrIhqGqSO3LXrgigR9KkC/2Pzw3Eur5RXOQ=="],
+
+    "@absolutejs/secure-messaging/@absolutejs/manifest": ["@absolutejs/manifest@0.9.0", "", { "peerDependencies": { "@sinclair/typebox": ">=0.34.0 <0.35.0" }, "bin": { "absolute-manifest": "dist/cli.js" } }, "sha512-naNDdwNoWQgJ3HuFbAu1UcOVR7SGpLBJz/seO8MMX32vrxk6esgzY7OB1CL8YDOegtI/EqQfcvnulnP66A9aGg=="],
 
     "@neondatabase/serverless/@types/node": ["@types/node@22.20.1", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-EANqOCF9QFyra+4pfxUcX9STKJpCLjMbObVzljIJomAWSnuSIEAvyzEU53GaajbXJEgdh0iEcPL+DGvpUd4k1Q=="],
 
