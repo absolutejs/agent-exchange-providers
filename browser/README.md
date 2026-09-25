@@ -27,3 +27,16 @@ form at the exact owner-approved origin. It never returns input values or page
 text, rejects ambiguous controls/password forms and cross-origin actions, and
 produces a session-local profile for the existing destination binder. Discovery
 does not grant authority. Hosts must still verify the expected signed-in account.
+
+## Desktop extension destination
+
+`createExtensionVerificationPage` adapts an explicitly clicked Chrome MV3 tab to
+this package's existing verification destination and account observer. Use only
+`activeTab` and `scripting`; no persistent all-site or browsing-history permission
+is needed. It restricts execution to the selected tab's top frame, checks the
+exact service origin, forwards navigation changes to the destination binder, and
+removes listeners on close. The caller still verifies the mandate and current
+requester access. Keep the adapter in the extension worker and never expose its
+`evaluate` method or accept JavaScript through external messages. Chrome docs:
+https://developer.chrome.com/docs/extensions/develop/concepts/activeTab and
+https://developer.chrome.com/docs/extensions/reference/api/scripting.

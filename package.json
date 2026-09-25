@@ -21,7 +21,9 @@
     "postgres",
     "permissions",
     "browser",
-    "discovery"
+    "discovery",
+    "browser-session",
+    "local"
   ],
   "scripts": {
     "build": "bun run --cwd conformance build && bun run --cwd destinations build && bun run --cwd oauth build && bun run --cwd broker build && bun run --cwd a2a build && bun run --cwd webauthn build && bun run --cwd oauth-webcrypto build && bun run --cwd oauth-stores build && bun run --cwd mandate-webcrypto build && bun run --cwd mandate-stores build && bun run --cwd google build && bun run --cwd microsoft build && bun run --cwd http-destination build && bun run --cwd secure-messaging build && bun run --cwd secure-messaging-stores build && bun run --cwd postgres build && bun run --cwd permissions build && bun run --cwd browser build",

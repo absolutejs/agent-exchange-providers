@@ -452,3 +452,8 @@ export async function verifyBrowserAccountSession(input: {
   }
   return false;
 }
+
+export {
+  createExtensionVerificationPage,
+  type ExtensionVerificationApi,
+} from "./extension";
