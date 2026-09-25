@@ -156,3 +156,36 @@ test.skipIf(!process.env.BROWSER_TEST_CDP || !process.env.PLAYWRIGHT_MODULE)(
   },
   20000,
 );
+
+test.skipIf(!process.env.BROWSER_TEST_CDP || !process.env.PLAYWRIGHT_MODULE)(
+  "generic account proof opens an accessible user menu",
+  async () => {
+    const { verifyBrowserAccountSession } = await import("../src");
+    const { chromium } = await import(process.env.PLAYWRIGHT_MODULE!);
+    const browser = await chromium.connectOverCDP(
+      process.env.BROWSER_TEST_CDP!,
+    );
+    const context = await browser.newContext();
+    try {
+      const page = await context.newPage();
+      await page.route("**/*", (r: any) =>
+        r.fulfill({
+          contentType: "text/html",
+          body: `<button aria-label="User Menu" onclick="document.querySelector('main').innerHTML='<div>My Account</div><div>Sign Out</div>';document.querySelector('main div').onclick=()=>{document.querySelector('main').innerHTML='<p>owner@example.com</p><div>Sign Out</div>'}">U</button><main></main>`,
+        }),
+      );
+      await page.goto("https://unfamiliar.example/dashboard");
+      expect(
+        await verifyBrowserAccountSession({
+          page,
+          origin: "https://unfamiliar.example",
+          accountEmail: "owner@example.com",
+        }),
+      ).toBe(true);
+    } finally {
+      await context.close();
+      await browser.close();
+    }
+  },
+  20000,
+);

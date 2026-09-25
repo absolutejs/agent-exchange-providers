@@ -346,17 +346,42 @@ export async function verifyBrowserAccountSession(input: {
   origin: string;
   accountEmail: string;
 }) {
-  async function inspect() {
+  let menuOpened = false;
+  async function inspect(openMenu = false) {
     return input.page.evaluate(
-      ({ origin, email }) => {
+      ({ origin, email, openMenu }) => {
         if (location.origin !== origin)
           return { verified: false, links: [] as string[] };
+        if (
+          openMenu &&
+          !Array.from(document.querySelectorAll<HTMLElement>("body *")).some(
+            (e) =>
+              e.children.length === 0 &&
+              e.getClientRects().length > 0 &&
+              /^(sign out|log out|logout|my account|profile|account settings)$/i.test(
+                e.textContent?.trim() ?? "",
+              ),
+          )
+        ) {
+          const menus = Array.from(
+            document.querySelectorAll<HTMLButtonElement>("button"),
+          ).filter(
+            (e) =>
+              e.getClientRects().length > 0 &&
+              !e.disabled &&
+              /^(user|account|profile)( menu)?$/i.test(
+                e.getAttribute("aria-label") ?? e.textContent?.trim() ?? "",
+              ),
+          );
+          if (menus.length === 1) menus[0]!.click();
+        }
         const identity = Array.from(
           document.querySelectorAll("span,p,div,a,li,dd,h1,h2,h3"),
         ).some((e) => e.textContent?.trim() === email);
-        const signout = Array.from(document.querySelectorAll("a,button")).some(
-          (e) =>
-            /^(sign out|log out|logout)$/i.test(e.textContent?.trim() ?? ""),
+        const signout = Array.from(
+          document.querySelectorAll("a,button,[role=menuitem],div,span"),
+        ).some((e) =>
+          /^(sign out|log out|logout)$/i.test(e.textContent?.trim() ?? ""),
         );
         const codeVisible = Array.from(
           document.querySelectorAll("[data-absolute-verification-code]"),
@@ -382,20 +407,45 @@ export async function verifyBrowserAccountSession(input: {
           links: [...new Set(links)],
         };
       },
-      { origin: input.origin, email: input.accountEmail },
+      { origin: input.origin, email: input.accountEmail, openMenu },
     );
   }
   for (let attempt = 0; attempt < 20; attempt++) {
     try {
-      if ((await inspect()).verified) return true;
+      const openMenu = attempt >= 4 && !menuOpened;
+      if (openMenu) menuOpened = true;
+      if ((await inspect(openMenu)).verified) return true;
     } catch {
       /* navigation in progress */
     }
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
   const snapshot = await inspect();
-  if (snapshot.links.length !== 1) return false;
-  await input.page.goto(snapshot.links[0]!);
+  if (snapshot.links.length === 1) await input.page.goto(snapshot.links[0]!);
+  else {
+    const opened = await input.page.evaluate(
+      ({ origin }) => {
+        if (location.origin !== origin) return false;
+        const controls = Array.from(
+          document.querySelectorAll<HTMLElement>(
+            "a,button,[role=menuitem],div,span",
+          ),
+        ).filter(
+          (e) =>
+            e.children.length === 0 &&
+            e.getClientRects().length > 0 &&
+            /^(my account|profile|account settings)$/i.test(
+              e.textContent?.trim() ?? "",
+            ),
+        );
+        if (controls.length !== 1) return false;
+        controls[0]!.click();
+        return true;
+      },
+      { origin: input.origin },
+    );
+    if (!opened) return false;
+  }
   for (let attempt = 0; attempt < 20; attempt++) {
     if ((await inspect()).verified) return true;
     await new Promise((resolve) => setTimeout(resolve, 500));
