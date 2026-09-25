@@ -30,3 +30,10 @@ requester cancelling one request must not revoke a mailbox owner's saved grant.
 Deny rejects the pending request only. It does not create a permanent block. To
 stop previously saved access, revoke that grant separately. Revocation prevents
 future stages and cannot recall an already dispatched provider operation.
+
+Saved permissions may be explicitly enabled for `routine` or `authentication`
+profiles. Authentication grants remain bound to the exact owner, requester,
+mailbox, origin, operation and profile/adapter revision. They require owner
+passkey approval and expire after 30 days or 100 uses. Recovery and other
+security-changing risks cannot enable saved permission. Hosts must classify
+operations honestly and recheck active access before every execution.

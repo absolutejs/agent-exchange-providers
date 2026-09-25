@@ -21,3 +21,9 @@ Disable browser tracing, screenshots, recordings and body logging during protect
 submission. Only the redacted success/error result may reach a model. Mutable
 copies are wiped, but transient browser/runtime strings cannot be guaranteed to
 be erased. The provider's page necessarily receives the code.
+
+`discoverBrowserVerificationProfile` inspects a conventional single-input OTP
+form at the exact owner-approved origin. It never returns input values or page
+text, rejects ambiguous controls/password forms and cross-origin actions, and
+produces a session-local profile for the existing destination binder. Discovery
+does not grant authority. Hosts must still verify the expected signed-in account.

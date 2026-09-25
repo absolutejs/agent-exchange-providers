@@ -1,5 +1,8 @@
 import { test, expect } from "bun:test";
-import { createBrowserVerificationDestination } from "../src";
+import {
+  createBrowserVerificationDestination,
+  discoverBrowserVerificationProfile,
+} from "../src";
 import type { AgentExchangeRequest } from "@absolutejs/agent-exchange";
 // Optional real-browser conformance; routes are fulfilled locally, no provider traffic.
 test.skipIf(!process.env.BROWSER_TEST_CDP || !process.env.PLAYWRIGHT_MODULE)(
@@ -69,22 +72,17 @@ test.skipIf(!process.env.BROWSER_TEST_CDP || !process.env.PLAYWRIGHT_MODULE)(
           risk: "authentication",
           secretKind: "email-one-time-code",
         };
-        const create = () =>
+        const create = async () =>
           createBrowserVerificationDestination({
             page,
             request,
             tenantId: "fixture",
-            profile: {
+            profile: await discoverBrowserVerificationProfile({
+              page,
               id: "fixture",
               origin: "https://verification-fixture.invalid",
               operation: "login",
-              submission: scenario === "native" ? "native-post" : "spa",
-              pathnames: ["/verify"],
-              formActionPathnames: ["/verify"],
-              formSelector: "form",
-              codeSelector: "input[name=code]",
-              submitSelector: "button[type=submit]",
-            },
+            }),
             assertAuthorized: async () => {},
             verifySuccess: async () => {
               await page
@@ -117,4 +115,44 @@ test.skipIf(!process.env.BROWSER_TEST_CDP || !process.env.PLAYWRIGHT_MODULE)(
     }
   },
   30000,
+);
+
+test.skipIf(!process.env.BROWSER_TEST_CDP || !process.env.PLAYWRIGHT_MODULE)(
+  "generic account proof requires expected identity and sign-out, never a redirect alone",
+  async () => {
+    const { verifyBrowserAccountSession } = await import("../src");
+    const { chromium } = await import(process.env.PLAYWRIGHT_MODULE!);
+    const browser = await chromium.connectOverCDP(
+      process.env.BROWSER_TEST_CDP!,
+    );
+    const context = await browser.newContext();
+    try {
+      const page = await context.newPage();
+      await page.route("**/*", (route: any) =>
+        route.fulfill({
+          contentType: "text/html",
+          body: "<p>owner@example.com</p><button>Sign Out</button>",
+        }),
+      );
+      await page.goto("https://unfamiliar.example/account");
+      expect(
+        await verifyBrowserAccountSession({
+          page,
+          origin: "https://unfamiliar.example",
+          accountEmail: "owner@example.com",
+        }),
+      ).toBe(true);
+      expect(
+        await verifyBrowserAccountSession({
+          page,
+          origin: "https://unfamiliar.example",
+          accountEmail: "wrong@example.com",
+        }),
+      ).toBe(false);
+    } finally {
+      await context.close();
+      await browser.close();
+    }
+  },
+  20000,
 );
