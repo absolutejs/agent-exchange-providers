@@ -1,5 +1,5 @@
 import { lookup } from "node:dns/promises";
-import { chromium, type Page } from "playwright-core";
+import { chromium, type Page, type ElementHandle } from "playwright-core";
 import {
   isPublicNetworkAddress,
   pinnedPublicRequest,
@@ -172,10 +172,91 @@ export async function maskedBrowserPreview(page: Page) {
   });
 }
 
+export type BrowserFocus = {
+  id: string | null;
+  kind: "password" | "email" | "verification" | "text" | "none";
+  editable: boolean;
+  bounds: { x: number; y: number; width: number; height: number } | null;
+};
+const focusedFields = new WeakMap<
+  Page,
+  { id: string; element: ElementHandle<SVGElement | HTMLElement> }
+>();
+/** Fixed field categories and geometry only. Never returns field values, page
+ * labels, surrounding text, or password length. IDs bind text to the exact DOM
+ * element observed by the human, and expire on focus/document changes. */
+export async function getBrowserFocus(page: Page): Promise<BrowserFocus> {
+  const element = await page.$(":focus");
+  const previous = focusedFields.get(page);
+  const metadata =
+    element &&
+    (await element.evaluate((node) => {
+      const input = node instanceof HTMLInputElement;
+      const textarea = node instanceof HTMLTextAreaElement;
+      if (!input && !textarea) return null;
+      const type = input ? node.type : "text";
+      if (
+        ![
+          "text",
+          "password",
+          "email",
+          "search",
+          "tel",
+          "url",
+          "number",
+        ].includes(type)
+      )
+        return null;
+      const rect = node.getBoundingClientRect();
+      return {
+        kind:
+          type === "password"
+            ? ("password" as const)
+            : node.autocomplete === "one-time-code"
+              ? ("verification" as const)
+              : type === "email" || node.autocomplete === "username"
+                ? ("email" as const)
+                : ("text" as const),
+        editable:
+          !node.disabled && !node.readOnly && rect.width > 0 && rect.height > 0,
+        bounds: {
+          x: rect.x,
+          y: rect.y,
+          width: rect.width,
+          height: rect.height,
+        },
+      };
+    }));
+  if (!element || !metadata?.editable) {
+    await element?.dispose();
+    await previous?.element.dispose();
+    focusedFields.delete(page);
+    return {
+      id: null,
+      kind: metadata?.kind ?? "none",
+      editable: false,
+      bounds: metadata?.bounds ?? null,
+    };
+  }
+  const same =
+    previous &&
+    (await element
+      .evaluate((node, prior) => node === prior, previous.element)
+      .catch(() => false));
+  if (same) {
+    await element.dispose();
+    return { ...metadata, id: previous.id };
+  }
+  await previous?.element.dispose();
+  const id = crypto.randomUUID();
+  focusedFields.set(page, { id, element });
+  return { ...metadata, id };
+}
+
 export type BrowserHumanInput =
   | { type: "click"; x: number; y: number }
   | { type: "scroll"; deltaY: number }
-  | { type: "text"; text: string }
+  | { type: "text"; text: string; focusId: string }
   | { type: "key"; key: string };
 /** Human-only controls. Values must never be persisted, audited, traced or sent
  * to a model. The host supplies the authenticated actor and serializes this with
@@ -212,7 +293,19 @@ export async function applyBrowserHumanInput(
         input.text.length > 4096
       )
         throw Error("Invalid text input");
-      await page.keyboard.insertText(input.text);
+      // Re-read focus before accepting private input. fill targets the captured
+      // element, rather than whichever field gains focus during an async pause.
+      const focus = await getBrowserFocus(page);
+      const target = focusedFields.get(page);
+      if (
+        !input.focusId ||
+        !focus.editable ||
+        focus.id !== input.focusId ||
+        !target
+      )
+        throw Error("Selected field changed; select it again");
+      await target.element.fill(input.text);
+
       break;
     case "key":
       if (

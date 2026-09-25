@@ -56,6 +56,7 @@ export function createBrowserSessionPool<Page>(options: {
     closing?: Promise<void>;
     timer?: ReturnType<typeof setTimeout>;
     busy: boolean;
+    settled?: Promise<void>;
     failedClose: boolean;
   };
   const entries = new Map<string, Entry>();
@@ -118,10 +119,34 @@ export function createBrowserSessionPool<Page>(options: {
     operation: "interact" | "verify",
     work: Work<Result>,
   ) {
-    const entry = await access(actorId, id, operation);
+    let entry = await access(actorId, id, operation);
+    // A human click may arrive while its latest preview is being rendered.
+    // Wait for that bounded operation rather than dropping the click. Never
+    // queue human input behind a protected verification.
+    if (entry.busy && entry.info.state === "ready" && entry.settled) {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        await Promise.race([
+          entry.settled,
+          new Promise<never>((_, reject) => {
+            timer = setTimeout(
+              () => reject(Error("Browser session busy")),
+              6000,
+            );
+          }),
+        ]);
+      } finally {
+        clearTimeout(timer);
+      }
+      entry = await access(actorId, id, operation);
+    }
     if (entry.busy || !entry.resource || entry.info.state !== "ready")
       throw Error("Browser session busy");
     entry.busy = true;
+    let release!: () => void;
+    entry.settled = new Promise<void>((resolve) => {
+      release = resolve;
+    });
     if (operation === "verify")
       entry.info = { ...entry.info, state: "verifying" };
     try {
@@ -133,6 +158,8 @@ export function createBrowserSessionPool<Page>(options: {
       });
     } finally {
       entry.busy = false;
+      release();
+      entry.settled = undefined;
       if (entry.info.state !== "closing")
         entry.info = { ...entry.info, state: "ready" };
     }

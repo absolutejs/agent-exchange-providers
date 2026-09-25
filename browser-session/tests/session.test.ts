@@ -147,3 +147,28 @@ test("only exact HTTPS origins can be bound", async () => {
     ).rejects.toThrow();
   await pool.stop();
 });
+
+test("human input waits for a preview instead of being dropped", async () => {
+  const { pool } = fixture();
+  const session = await pool.create("alice", scope);
+  let release!: () => void;
+  const preview = pool.interact(
+    "alice",
+    session.id,
+    () =>
+      new Promise<void>((resolve) => {
+        release = resolve;
+      }),
+  );
+  await Bun.sleep(0);
+  let applied = false;
+  const input = pool.interact("alice", session.id, async () => {
+    applied = true;
+  });
+  await Bun.sleep(0);
+  expect(applied).toBe(false);
+  release();
+  await Promise.all([preview, input]);
+  expect(applied).toBe(true);
+  await pool.stop();
+});

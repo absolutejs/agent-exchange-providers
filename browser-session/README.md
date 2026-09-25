@@ -30,3 +30,10 @@ Browser resources are deliberately ephemeral. Persist requests, authorization
 and audit records in ABS's durable packages. A runner restart loses its browser
 sessions; mark affected attempts interrupted and never automatically replay an
 uncertain sign-in. Launchers must honor abort and terminate within bounded time.
+
+Version 0.2 adds `getBrowserFocus`: fixed field categories, bounds and an opaque
+DOM-element binding, never values or arbitrary page labels. Text input requires
+the returned `focusId`; changed focus or a reloaded document fails closed. Filling
+replaces the selected field value so retrying acknowledged input cannot append a
+password twice. Hosts must show the selected field and confirm accepted input.
+Human input waits for an in-flight preview; protected verification stays exclusive.
