@@ -100,8 +100,10 @@ export function createAgentExchangePermissionManager(options: {
     if (profiles.has(p.id) || typeof p.allowAlways !== "boolean")
       throw Error("Invalid service catalog");
     // Recovery/security operations must never silently inherit routine grants.
-    if (p.allowAlways && p.grant.risk !== "routine")
-      throw Error("Only routine profiles support saved permission");
+    if (p.allowAlways && !["routine", "authentication"].includes(p.grant.risk))
+      throw Error(
+        "Only routine or authentication profiles support saved permission",
+      );
     profiles.set(p.id, p);
   }
   const scopeKey = (input: PermissionScope) => {

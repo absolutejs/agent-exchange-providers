@@ -198,3 +198,18 @@ test("revocation during issuance cannot activate a saved grant", async () => {
   expect((await f.store.get(r.id))?.state).toBe("revoked");
   expect(f.revoked).toContain(r.id);
 });
+
+test("explicit authentication profiles support scoped saved approval; recovery stays excluded", async () => {
+  const f = fixture();
+  const manager = createAgentExchangePermissionManager({
+    profiles: [
+      { ...profile, grant: { ...profile.grant, risk: "authentication" } },
+    ],
+    store: f.store,
+    authority: f.authority,
+  });
+  const permission = await manager.prepare({ ...input, mode: "always" });
+  expect(permission.draft.grants[0]?.risk).toBe("authentication");
+  expect(permission.draft.maximumUses).toBe(100);
+  expect(permission.profile.allowAlways).toBe(true);
+});

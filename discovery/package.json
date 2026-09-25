@@ -1,16 +1,16 @@
 {
-  "name": "@absolutejs/agent-exchange-permissions",
-  "version": "0.2.0",
-  "description": "Service profiles and owner-approved reusable permissions for secure Agent Exchange.",
+  "name": "@absolutejs/agent-exchange-discovery",
+  "version": "0.1.0",
+  "description": "Owner-reviewable verification-service discovery with authenticated email evidence.",
   "type": "module",
   "license": "Apache-2.0",
   "author": "Alex Kahn",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/absolutejs/agent-exchange-providers.git",
-    "directory": "permissions"
+    "directory": "discovery"
   },
-  "homepage": "https://github.com/absolutejs/agent-exchange-providers/tree/main/permissions",
+  "homepage": "https://github.com/absolutejs/agent-exchange-providers/tree/main/discovery",
   "bugs": {
     "url": "https://github.com/absolutejs/agent-exchange-providers/issues"
   },
@@ -33,7 +33,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "rm -rf dist && bun build src/index.ts --outdir dist --root src --sourcemap --target=browser --external @absolutejs/agent-exchange && tsc --project tsconfig.build.json",
+    "build": "rm -rf dist && bun build src/index.ts --outdir dist --root src --sourcemap --target=browser --external @absolutejs/email --external tldts && tsc --project tsconfig.build.json",
     "format": "prettier --write \"./**/*.{ts,json,md}\"",
     "format:check": "prettier --check \"./**/*.{ts,json,md}\"",
     "test": "bun test tests/",
@@ -42,12 +42,15 @@
     "prepublishOnly": "bun run check:package"
   },
   "devDependencies": {
-    "@absolutejs/agent-exchange": "0.5.0",
     "@types/bun": "^1.3.14",
     "typescript": "^5.9.0",
-    "@absolutejs/agent-exchange-mandate-stores": "0.2.1"
+    "@absolutejs/agent-exchange-permissions": "workspace:*"
   },
   "peerDependencies": {
-    "@absolutejs/agent-exchange": ">=0.5.0 <0.6"
+    "@absolutejs/agent-exchange-permissions": ">=0.2.0 <0.3"
+  },
+  "dependencies": {
+    "@absolutejs/email": "0.6.0",
+    "tldts": "^7.0.0"
   }
 }
