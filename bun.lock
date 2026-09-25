@@ -122,6 +122,21 @@
         "typescript": "^5.9.0",
       },
     },
+    "local": {
+      "name": "@absolutejs/agent-exchange-local",
+      "version": "0.1.0",
+      "devDependencies": {
+        "@absolutejs/agent-exchange": "0.5.0",
+        "@absolutejs/agent-exchange-destinations": "0.3.1",
+        "@absolutejs/e2ee-webcrypto": "0.2.1",
+        "@types/bun": "^1.3.14",
+        "typescript": "^5.9.0",
+      },
+      "peerDependencies": {
+        "@absolutejs/agent-exchange": ">=0.5.0 <0.6",
+        "@absolutejs/e2ee-webcrypto": ">=0.2.1 <0.3",
+      },
+    },
     "mandate-stores": {
       "name": "@absolutejs/agent-exchange-mandate-stores",
       "version": "0.2.1",
@@ -286,6 +301,8 @@
 
     "@absolutejs/agent-exchange-http-destination": ["@absolutejs/agent-exchange-http-destination@workspace:http-destination"],
 
+    "@absolutejs/agent-exchange-local": ["@absolutejs/agent-exchange-local@workspace:local"],
+
     "@absolutejs/agent-exchange-mandate-stores": ["@absolutejs/agent-exchange-mandate-stores@workspace:mandate-stores"],
 
     "@absolutejs/agent-exchange-mandate-webcrypto": ["@absolutejs/agent-exchange-mandate-webcrypto@workspace:mandate-webcrypto"],
@@ -316,6 +333,8 @@
 
     "@absolutejs/e2ee": ["@absolutejs/e2ee@0.5.0", "", { "dependencies": { "@absolutejs/manifest": "^0.9.0", "@sinclair/typebox": "^0.34.0" } }, "sha512-76xPOYngA1tortaQBwjaJAuXQ1vu7iR+wR3L5fMch/6asLKj80vYWnJ88ErTRER1v8+9P6VZ+rdyh57HVsP9qg=="],
 
+    "@absolutejs/e2ee-webcrypto": ["@absolutejs/e2ee-webcrypto@0.2.1", "", { "dependencies": { "@absolutejs/manifest": "^0.9.0", "@noble/hashes": "2.0.1", "@sinclair/typebox": "^0.34.0", "hpke": "1.1.4" }, "peerDependencies": { "@absolutejs/e2ee": ">=0.5.0 <0.6" } }, "sha512-42ahlZZUplbzSv6oVd3t9IhjdLuuVXUHPRm1RwcYy7uaM2aOSI8ejgG1Ayory7mDE6uA0Q7nZ1uF/oi2q/DY7g=="],
+
     "@absolutejs/egress": ["@absolutejs/egress@0.3.1", "", { "dependencies": { "@absolutejs/manifest": "^0.9.0", "@sinclair/typebox": "^0.34.0" } }, "sha512-JamtxOJOLpe+NHU8ff0Q7NShdDIdfRFK3kfAr/XNUplefxuj+oJS4NHQGemojGI+dj/ei/TcXkpjIfzL0sOE0w=="],
 
     "@absolutejs/email": ["@absolutejs/email@0.6.0", "", { "dependencies": { "@absolutejs/manifest": "^0.9.0", "@sinclair/typebox": "^0.34.0", "imapflow": "^1.4.1" } }, "sha512-3ZyRLnuwWaydSefIrr3DJGGv2SyVNOUtUn5+7zNZWNviOmqEHV82DXD44wgQU8D4y5pJlhL1Js3Y1jYr/iPQ5A=="],
@@ -327,6 +346,8 @@
     "@absolutejs/secure-messaging": ["@absolutejs/secure-messaging@0.5.1", "", { "dependencies": { "@absolutejs/e2ee": "0.8.0", "@absolutejs/manifest": "^0.9.0", "@sinclair/typebox": "^0.34.0" } }, "sha512-iAzCBjBWnOxCqtxASS5HtTvz/hOi4MIupKxLt5N/iiX/LHUF4BEvA5GwvOTV/de1e9ZD1G1+MmS9KzuexfPo4Q=="],
 
     "@neondatabase/serverless": ["@neondatabase/serverless@1.0.0", "", { "dependencies": { "@types/node": "^22.10.2", "@types/pg": "^8.8.0" } }, "sha512-XWmEeWpBXIoksZSDN74kftfTnXFEGZ3iX8jbANWBc+ag6dsiQuvuR4LgB0WdCOKMb5AQgjqgufc0TgAsZubUYw=="],
+
+    "@noble/hashes": ["@noble/hashes@2.0.1", "", {}, "sha512-XlOlEbQcE9fmuXxrVTXCTlG2nlRXa9Rj3rr5Ue/+tX+nmkgbX720YHh0VR3hBF9xDvwnb8D2shVGOwNx+ulArw=="],
 
     "@opentelemetry/api": ["@opentelemetry/api@1.9.1", "", {}, "sha512-gLyJlPHPZYdAk1JENA9LeHejZe1Ti77/pTeFm/nMXmQH/HFZlcS/O2XJB+L8fkbrNSqhdtlvjBVjxwUYanNH5Q=="],
 
@@ -359,6 +380,8 @@
     "encoding-japanese": ["encoding-japanese@2.3.0", "", {}, "sha512-eQyh1vzHz13DUkZcJO+0IOAoKXRQwKV5IBffeuYsWZyRLGiSzfzXObCqWvqFXdX0UU8qOk+lBXbkUhMCpdJe4Q=="],
 
     "exact-mirror": ["exact-mirror@1.2.4", "", { "peerDependencies": { "typebox": ">= 1.1.0" }, "optionalPeers": ["typebox"] }, "sha512-lNLw824fkSqcHSxNIh8skA7gHO5X5Q8UUllXuRedtJCU8cJwKOT3XPQY8GfhveatFMO4nCK8+oEXsLGErMWC/Q=="],
+
+    "hpke": ["hpke@1.1.4", "", {}, "sha512-cPzmFEsiyNnD7281X5WeZ461mbH+3P+rjWMSNrLO5rks7dAJvFXAyMwCmorB61pxt+jBnd0GQ6CY43TqOxmhCQ=="],
 
     "iconv-lite": ["iconv-lite@0.7.3", "", { "dependencies": { "safer-buffer": ">= 2.1.2 < 3.0.0" } }, "sha512-IKXpvIzjnC9XTAUbVBcMfGS0EPaIXtW6v+zr+RRp+hqULEpo0owZax6wyRwPOJbWbzjYspQwusTsfVr0ifh4uQ=="],
 
@@ -441,6 +464,8 @@
     "@absolutejs/auth/@absolutejs/manifest": ["@absolutejs/manifest@0.10.0", "", { "peerDependencies": { "typebox": ">=1.3.0 <2" }, "bin": { "absolute-manifest": "dist/cli.js" } }, "sha512-aBzi7PPFfEl51DdJfB2XXT5KHBiLlB0KeNHsU68XnfeqZmjOtFdxlcxYjbGep94sDTCgAbapNLCT+D4azDL5Eg=="],
 
     "@absolutejs/e2ee/@absolutejs/manifest": ["@absolutejs/manifest@0.9.0", "", { "peerDependencies": { "@sinclair/typebox": ">=0.34.0 <0.35.0" }, "bin": { "absolute-manifest": "dist/cli.js" } }, "sha512-naNDdwNoWQgJ3HuFbAu1UcOVR7SGpLBJz/seO8MMX32vrxk6esgzY7OB1CL8YDOegtI/EqQfcvnulnP66A9aGg=="],
+
+    "@absolutejs/e2ee-webcrypto/@absolutejs/manifest": ["@absolutejs/manifest@0.9.0", "", { "peerDependencies": { "@sinclair/typebox": ">=0.34.0 <0.35.0" }, "bin": { "absolute-manifest": "dist/cli.js" } }, "sha512-naNDdwNoWQgJ3HuFbAu1UcOVR7SGpLBJz/seO8MMX32vrxk6esgzY7OB1CL8YDOegtI/EqQfcvnulnP66A9aGg=="],
 
     "@absolutejs/egress/@absolutejs/manifest": ["@absolutejs/manifest@0.9.0", "", { "peerDependencies": { "@sinclair/typebox": ">=0.34.0 <0.35.0" }, "bin": { "absolute-manifest": "dist/cli.js" } }, "sha512-naNDdwNoWQgJ3HuFbAu1UcOVR7SGpLBJz/seO8MMX32vrxk6esgzY7OB1CL8YDOegtI/EqQfcvnulnP66A9aGg=="],
 
