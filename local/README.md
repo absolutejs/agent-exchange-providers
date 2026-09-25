@@ -17,7 +17,8 @@ recheck owner identity and current permission on every read and acknowledgement.
 `@absolutejs/agent-exchange-local/windows` provides the Windows/WSL clipboard
 adapter. It feeds six digits through stdin to a fixed short-lived native helper,
 opts out of Windows history/cloud sync, and clears its own clipboard write after
-at most 30 seconds using the clipboard sequence under a native clipboard lock.
+30 seconds (`LOCAL_CLIPBOARD_TTL_MS`, counted from the write, not from the
+exchange request) using the clipboard sequence under a native clipboard lock.
 It does not clear a later clipboard write. No secret enters argv, env, files,
 stdout or stderr. Other platforms fail closed until a private adapter is supplied.
 

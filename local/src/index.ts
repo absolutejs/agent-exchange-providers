@@ -11,6 +11,8 @@ import {
 } from "@absolutejs/e2ee-webcrypto";
 export * from "./relay";
 
+/** How long a delivered code stays on the clipboard, measured from the write. */
+export const LOCAL_CLIPBOARD_TTL_MS = 30000;
 export const LOCAL_CLIPBOARD_OPERATION =
   "verification-code.disclose-to-requester-clipboard";
 export type PrivateClipboard = {
@@ -100,10 +102,12 @@ export async function createLocalCodeRecipient(options: {
         )
           throw Error("Invalid local code delivery");
         await options.assertAuthorized(request);
-        const ttlMs = Math.min(30000, request.expiresAt - Date.now());
-        if (ttlMs < 1000) throw Error("Local code delivery expired");
+        if (request.expiresAt <= Date.now())
+          throw Error("Local code delivery expired");
         used = true; // Never retry an ambiguous clipboard write automatically.
-        await options.clipboard.copy(plaintext, ttlMs);
+        // The exchange window bounds when a delivery is accepted, not how long the
+        // human has to paste: collecting the email can use most of that window.
+        await options.clipboard.copy(plaintext, LOCAL_CLIPBOARD_TTL_MS);
         return { status: "submitted" };
       },
     },

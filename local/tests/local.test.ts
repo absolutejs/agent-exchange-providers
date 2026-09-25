@@ -7,13 +7,15 @@ import { createWebCryptoEnvelopeProvider } from "@absolutejs/e2ee-webcrypto";
 import {
   createLocalCodeRecipient,
   LOCAL_CLIPBOARD_OPERATION,
+  LOCAL_CLIPBOARD_TTL_MS,
   encodeLocalDelivery,
   decodeLocalDelivery,
   clipboardServiceProfile,
 } from "../src";
 
-async function fixture() {
+async function fixture(expiresInMs = 60000) {
   const copied: Uint8Array[] = [];
+  const lifetimes: number[] = [];
   let authorized = true;
   const requester = {
     authority: "https://management.example",
@@ -25,8 +27,9 @@ async function fixture() {
     serviceOrigin: "https://service.example",
     accountRef: "mailbox",
     clipboard: {
-      copy: async (bytes) => {
+      copy: async (bytes, ttlMs) => {
         copied.push(bytes.slice());
+        lifetimes.push(ttlMs);
       },
     },
     assertAuthorized: async () => {
@@ -38,7 +41,7 @@ async function fixture() {
     exchangeId: "exchange",
     nonce: "nonce",
     createdAt: Date.now(),
-    expiresAt: Date.now() + 60000,
+    expiresAt: Date.now() + expiresInMs,
     maximumUses: 1,
     processingMode: "tool-confined",
     assurance: {
@@ -76,6 +79,7 @@ async function fixture() {
     local,
     request,
     copied,
+    lifetimes,
     revoke: () => {
       authorized = false;
     },
@@ -128,4 +132,15 @@ test("clipboard profiles cannot reuse browser permission identity or operation",
   expect(profile.permission.grant.operation).toBe(LOCAL_CLIPBOARD_OPERATION);
   expect(profile.email.operations).toEqual([LOCAL_CLIPBOARD_OPERATION]);
   expect(source.permission.grant.operation).toBe("login.verify");
+});
+test("a delivery late in the exchange window still gets the full clipboard lifetime", async () => {
+  const f = await fixture(1500);
+  await f.local.receive(f.delivery);
+  expect(f.lifetimes).toEqual([LOCAL_CLIPBOARD_TTL_MS]);
+});
+test("an expired exchange is rejected before the clipboard", async () => {
+  const f = await fixture(200);
+  await Bun.sleep(300);
+  await expect(f.local.receive(f.delivery)).rejects.toThrow();
+  expect(f.copied).toHaveLength(0);
 });
