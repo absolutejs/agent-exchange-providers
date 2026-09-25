@@ -1,6 +1,6 @@
 {
   "name": "@absolutejs/agent-exchange-browser",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Session-bound, model-blind browser verification destinations for Agent Exchange.",
   "type": "module",
   "license": "Apache-2.0",
