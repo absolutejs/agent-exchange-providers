@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test";
-import { createBrowserSessionPool } from "../src";
+import { createBrowserSessionPool, browserSessionFailure } from "../src";
 const scope = {
   ownerId: "alice",
   accountRef: "mailbox-a",
@@ -171,4 +171,25 @@ test("human input waits for a preview instead of being dropped", async () => {
   await Promise.all([preview, input]);
   expect(applied).toBe(true);
   await pool.stop();
+});
+
+test("public error categories never echo provider details or private input", () => {
+  expect(
+    browserSessionFailure(new Error("Selected field changed; select it again")),
+  ).toBe("field_changed");
+  expect(browserSessionFailure(new Error("Browser session expired"))).toBe(
+    "session_expired",
+  );
+  expect(browserSessionFailure(new Error("Browser session busy"))).toBe(
+    "session_busy",
+  );
+  expect(browserSessionFailure(new Error("synthetic-private-value"))).toBe(
+    "operation_failed",
+  );
+  expect(browserSessionFailure(new Error("constructor"))).toBe(
+    "operation_failed",
+  );
+  expect(browserSessionFailure({ message: "synthetic-private-value" })).toBe(
+    "operation_failed",
+  );
 });

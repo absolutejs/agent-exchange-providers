@@ -1,6 +1,6 @@
 {
   "name": "@absolutejs/browser-session",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "description": "Owner-bound expiring browser sessions for human handoff and protected agent destinations.",
   "license": "Apache-2.0",

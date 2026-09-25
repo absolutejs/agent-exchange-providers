@@ -265,3 +265,38 @@ export function createBrowserSessionPool<Page>(options: {
     },
   };
 }
+
+/** Safe public failure categories. Never expose provider messages, call logs,
+ * field values, request bodies, URLs or credentials in client error responses. */
+export function browserSessionFailure(
+  error: unknown,
+):
+  | "session_expired"
+  | "session_busy"
+  | "session_unavailable"
+  | "field_changed"
+  | "origin_changed"
+  | "invalid_input"
+  | "input_timeout"
+  | "operation_failed" {
+  if (!(error instanceof Error)) return "operation_failed";
+  const codes: Record<string, ReturnType<typeof browserSessionFailure>> = {
+    "Browser session expired": "session_expired",
+    "Browser session expired during startup": "session_expired",
+    "Browser session busy": "session_busy",
+    "Browser capacity unavailable": "session_busy",
+    "Browser session unavailable": "session_unavailable",
+    "Selected field changed; select it again": "field_changed",
+    "Browser destination changed": "origin_changed",
+    "Invalid text input": "invalid_input",
+    "Invalid pointer position": "invalid_input",
+    "Invalid scroll distance": "invalid_input",
+    "Unsupported key": "invalid_input",
+    "Unsupported browser input": "invalid_input",
+  };
+  return Object.hasOwn(codes, error.message)
+    ? codes[error.message]!
+    : error.name === "TimeoutError"
+      ? "input_timeout"
+      : "operation_failed";
+}

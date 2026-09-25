@@ -48,7 +48,7 @@
     },
     "browser-session": {
       "name": "@absolutejs/browser-session",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "dependencies": {
         "@absolutejs/egress": "0.3.1",
         "playwright-core": "1.63.0",
