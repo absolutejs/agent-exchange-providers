@@ -34,7 +34,7 @@
     },
     "browser": {
       "name": "@absolutejs/agent-exchange-browser",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "devDependencies": {
         "@absolutejs/agent-exchange": "0.5.0",
         "@absolutejs/agent-exchange-destinations": "0.3.1",
