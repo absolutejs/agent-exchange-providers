@@ -29,6 +29,10 @@ Interchangeable, security-profiled providers for
 - [`@absolutejs/agent-exchange-http-destination`](./http-destination) submits a
   six-digit code to one deployment-configured HTTPS endpoint without following
   redirects or returning the destination response to an agent.
+- [`@absolutejs/agent-exchange-secure-messaging`](./secure-messaging) carries
+  complete Agent Exchange deliveries and redacted receipts inside an
+  authenticated strict-E2EE conversation, with device binding and durable
+  receipt correlation.
 - [`@absolutejs/agent-exchange-google`](./google) and
   [`@absolutejs/agent-exchange-microsoft`](./microsoft) describe real BYO mailbox
   provider capabilities without upgrading their bearer-token boundaries.

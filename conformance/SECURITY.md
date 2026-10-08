@@ -14,3 +14,7 @@ responsibility; the `sandbox-only` acknowledgement is a guardrail, not a sandbox
 Conformance results cover only the observable checks in the report. They do not
 certify implementation internals, key custody, authorization policy, deployment
 security, or freedom from vulnerabilities.
+
+DPoP verification rejects non-canonical base64url before signature acceptance.
+Persist and compare the verified proof `jti` and key thumbprint rather than using
+the compact JWT string as the sole replay identity.

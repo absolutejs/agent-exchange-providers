@@ -1,6 +1,6 @@
 {
   "name": "@absolutejs/agent-exchange-oauth-webcrypto",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Non-exportable WebCrypto ES256 DPoP signer for Agent Exchange OAuth.",
   "type": "module",
   "license": "Apache-2.0",
@@ -40,7 +40,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@absolutejs/agent-exchange-provider-conformance": "0.3.0"
+    "@absolutejs/agent-exchange-provider-conformance": "0.3.1"
   },
   "devDependencies": {
     "@absolutejs/agent-exchange-oauth": "0.3.0",

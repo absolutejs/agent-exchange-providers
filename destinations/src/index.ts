@@ -82,7 +82,8 @@ const assertRequest = (input: AgentExchangeDestinationInput): void => {
     input.plaintext.byteLength === 0 ||
     request.processingMode !== "tool-confined" ||
     request.maximumUses !== 1 ||
-    request.assurance.approval !== "webauthn-verifier-bound" ||
+    (request.assurance.approval !== "webauthn-verifier-bound" &&
+      request.assurance.approval !== "standing-mandate") ||
     request.assurance.credential !== "token-confined-broker" ||
     request.assurance.execution !== "purpose-bound" ||
     !exactHttpsOrigin(request.resource.origin) ||

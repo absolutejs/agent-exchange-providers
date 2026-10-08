@@ -55,7 +55,7 @@ SELECT CASE
   WHEN EXISTS (SELECT 1 FROM updated) THEN 'consumed'
   WHEN NOT EXISTS (SELECT 1 FROM current) THEN 'unknown'
   WHEN (SELECT revoked_at FROM current) IS NOT NULL THEN 'revoked'
-  WHEN $2 = ANY((SELECT consumed_exchange_digests FROM current)) THEN 'replay'
+  WHEN (SELECT $2 = ANY(consumed_exchange_digests) FROM current) THEN 'replay'
   WHEN (SELECT use_count FROM current) >= (SELECT maximum_uses FROM current) THEN 'exhausted'
   ELSE 'unknown'
 END AS status

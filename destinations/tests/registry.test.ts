@@ -126,3 +126,27 @@ describe("Agent Exchange destination registry", () => {
     ).rejects.toThrow("submission failed");
   });
 });
+
+test("accepts signed standing-mandate delivery but rejects policy-only delivery", async () => {
+  const registry = createAgentExchangeDestinationRegistry([
+    adapter(() => ({ status: "submitted" })),
+  ]);
+  for (const approval of ["standing-mandate", "policy"] as const) {
+    const input = {
+      plaintext: new TextEncoder().encode("482193"),
+      tenantId: "tenant-1",
+      request: request({
+        assurance: {
+          approval,
+          credential: "token-confined-broker",
+          execution: "purpose-bound",
+        } as AgentExchangeRequest["assurance"],
+      }),
+    };
+    if (approval === "standing-mandate")
+      await expect(registry.submit(input)).resolves.toEqual({
+        status: "submitted",
+      });
+    else await expect(registry.submit(input)).rejects.toThrow();
+  }
+});

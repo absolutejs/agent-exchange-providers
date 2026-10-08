@@ -1,6 +1,6 @@
 {
   "name": "@absolutejs/agent-exchange-mandate-stores",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Atomic PostgreSQL and Redis stores for Agent Exchange standing mandates.",
   "type": "module",
   "license": "Apache-2.0",
@@ -37,7 +37,9 @@
     "format": "prettier --write \"./**/*.{ts,json,md}\"",
     "format:check": "prettier --check \"./**/*.{ts,json,md}\"",
     "test": "bun test tests/",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "bun run check:package",
+    "check:package": "bun run format:check && bun run typecheck && bun run test && bun run build"
   },
   "devDependencies": {
     "@absolutejs/agent-exchange": "0.5.0",
