@@ -13,6 +13,8 @@ export type DiscoveredVerificationService = {
     operations: readonly string[];
   };
 };
+const claudeOrigin = "https://claude.ai";
+const claudeSender = "no-reply-claude@mail.anthropic.com";
 const forbidden =
   /password\s*(?:reset|change)|reset\s*(?:your\s*)?password|account\s*recovery|disable\s*(?:2fa|mfa)|(?:change|remove|add)\s*(?:your\s*)?(?:email|phone|authenticator)|(?:payment|transfer|withdrawal)/i;
 /** No URL is fetched. PSL private-domain boundaries prevent trusting sibling tenants. */
@@ -34,6 +36,33 @@ export function verificationSearchDomain(origin: string) {
     allowPrivateDomains: true,
   })!;
 }
+/** The Gmail sender query used for owner-approved discovery. */
+export function discoverySenderQuery(origin: string) {
+  if (verificationServiceOrigin(origin) === claudeOrigin)
+    return "{from:claude.ai from:mail.anthropic.com}";
+  return `from:(${verificationSearchDomain(origin)})`;
+}
+
+/** Apply the recipient and exact reviewed subject constraints to Claude mail. */
+export function messagesForService(
+  origin: string,
+  mailbox: string,
+  messages: readonly NormalizedEmailMessage[],
+  approvedSubjects?: readonly string[],
+) {
+  if (verificationServiceOrigin(origin) !== claudeOrigin) return messages;
+  return messages.filter(
+    (message) =>
+      message.to?.some(
+        (recipient) =>
+          recipient.address?.trim().toLowerCase() ===
+          mailbox.trim().toLowerCase(),
+      ) &&
+      (!approvedSubjects ||
+        approvedSubjects.includes(message.subject?.trim() ?? "")),
+  );
+}
+
 const digest = async (value: unknown) =>
   Array.from(
     new Uint8Array(
@@ -63,13 +92,23 @@ export async function discoverVerificationService(input: {
     string,
     { email: DiscoveredVerificationService["email"] }
   >();
-  for (const message of input.messages) {
+  for (const message of messagesForService(
+    origin,
+    input.accountEmail,
+    input.messages,
+  )) {
     const sender = message.from?.address.toLowerCase() ?? "",
       senderDomain = sender.split("@")[1] ?? "";
     const subject = (message.subject ?? "").trim(),
       body = message.bodyText ?? "";
+    const recognizedClaudeSender =
+      origin === claudeOrigin &&
+      sender === claudeSender &&
+      /\bClaude(?:\.ai)?\b/i.test(subject) &&
+      !/\b(?:console|platform|api)\b/i.test(subject);
     if (
-      getDomain(senderDomain, { allowPrivateDomains: true }) !== domain ||
+      (!recognizedClaudeSender &&
+        getDomain(senderDomain, { allowPrivateDomains: true }) !== domain) ||
       !/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9.-]+$/.test(sender) ||
       subject.length > 160 ||
       /\d|https?:|[\r\n<>]/i.test(subject) ||

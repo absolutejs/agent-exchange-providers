@@ -1,6 +1,6 @@
 {
   "name": "@absolutejs/agent-exchange-discovery",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Owner-reviewable verification-service discovery with authenticated email evidence.",
   "type": "module",
   "license": "Apache-2.0",
@@ -33,12 +33,13 @@
     "access": "public"
   },
   "scripts": {
+    "prebuild": "bun run --cwd ../permissions build",
     "build": "rm -rf dist && bun build src/index.ts --outdir dist --root src --sourcemap --target=browser --external @absolutejs/email --external tldts && tsc --project tsconfig.build.json",
     "format": "prettier --write \"./**/*.{ts,json,md}\"",
     "format:check": "prettier --check \"./**/*.{ts,json,md}\"",
     "test": "bun test tests/",
     "typecheck": "tsc --noEmit",
-    "check:package": "bun run format:check && bun run typecheck && bun run test && bun run build",
+    "check:package": "bun run format:check && bun run build && bun run typecheck && bun run test",
     "prepublishOnly": "bun run check:package"
   },
   "devDependencies": {

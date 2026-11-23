@@ -3,7 +3,7 @@
 Discovers a reviewable verification-email profile for an exact HTTPS service origin.
 Uses PSL tenant boundaries, the exact connected mailbox, recent timestamps and
 Gmail's aligned DMARC evidence. Conflicting templates, multiple codes, recovery
-and security-changing templates fail closed. No provider names are built in.
+and security-changing templates fail closed. For https://claude.ai, discovery also recognizes the authenticated Claude sign-in sender no-reply-claude@mail.anthropic.com. Claude messages must name the connected recipient. Use discoverySenderQuery to select candidates and messagesForService with the reviewed subjects on subsequent lookups.
 
 The host must obtain mailbox-owner permission before inspecting at most ten recent
 messages. Discovery returns sender/subject/parser metadata, never a code or body.
